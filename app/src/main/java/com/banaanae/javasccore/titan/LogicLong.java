@@ -1,15 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.banaanae.javasccore.titan;
 
 import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
 
-/**
- *
- * @author Banaanae
- */
 public class LogicLong {
     int high = 0;
     int low = 0;

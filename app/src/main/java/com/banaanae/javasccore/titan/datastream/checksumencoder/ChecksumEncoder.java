@@ -1,11 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.banaanae.javasccore.titan.datastream.checksumencoder;
 
 import com.banaanae.javasccore.titan.LogicLong;
-import java.nio.ByteBuffer;
 
 /**
  *
@@ -69,11 +64,6 @@ public class ChecksumEncoder {
         this.checksum = vintValue + rotateRight(this.checksum, 31) + 33;
     }
     
-    public void writeLogicLong(LogicLong logicLongValue) {
-        //logicLongValue.encode(this);
-        System.out.print("TODO");
-    }
-    
     public void writeLongLong(long longLongValue) {
         final int high = LogicLong.getHigherInt(longLongValue);
         final int low = LogicLong.getLowerInt(longLongValue);
@@ -97,10 +87,10 @@ public class ChecksumEncoder {
     };
     
     public void writeFilteredStringReference(String stringValue) {
-        System.out.print("TODO");
+        System.out.print("TODO: writeFilteredStringReference");
     }
 
-    public void writeBytes(ByteBuffer buffer, int length) {
+    public void writeBytes(byte[] buffer, int length) {
         // TODO: Buffer validation
         this.checksum = (length != 0 ? length + 38 : 37) + this.rotateRight(this.checksum, 31);
     }
