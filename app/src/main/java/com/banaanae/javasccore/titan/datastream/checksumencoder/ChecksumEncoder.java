@@ -2,10 +2,6 @@ package com.banaanae.javasccore.titan.datastream.checksumencoder;
 
 import com.banaanae.javasccore.titan.LogicLong;
 
-/**
- *
- * @author Banaanae
- */
 public class ChecksumEncoder {
     private long checksum = 0;
     private long snapshotChecksum = 0;
