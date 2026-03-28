@@ -1,13 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.banaanae.javasccore.titan.logicreflector.logicjsonoutreflector;
 
-/**
- *
- * @author Banaanae
- */
-public class LogicJSONOutReflector {
+import com.banaanae.javasccore.titan.json.LogicJSONObject;
+import com.banaanae.javasccore.titan.logicreflector.LogicReflector;
+
+public class LogicJSONOutReflector extends LogicReflector {
+    LogicJSONObject currentObject;
+    currentArray;
+    public boolean reflectObject(String objectName) {
+        
+    }
     
+    
+    private LogicJSONObject beginObject(String objectName) {
+        
+    }
 }
