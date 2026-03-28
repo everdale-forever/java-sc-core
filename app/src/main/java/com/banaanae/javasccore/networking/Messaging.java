@@ -1,0 +1,53 @@
+package com.banaanae.javasccore.networking;
+
+import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.stream.Stream;
+
+public abstract class Messaging {
+    protected Socket session;
+    protected ByteStream stream; 
+    
+    public abstract void encode();
+    public abstract int getMessageType();
+    public abstract int getMessageVersion();
+    
+    public Messaging(Socket session) {
+        this.session = session;
+    }
+    
+    public void send(boolean doNotEncrypt) throws IOException {
+        if (this.getMessageType() < 20000) {
+            System.out.println("[Error] Attempted to send client message");
+            return;
+        }
+        
+        this.encode();
+        byte[] header = writeHeader(this.getMessageType(), this.stream.length, this.getMessageVersion());
+        byte[] payload = new byte[7 + this.stream.length];
+        System.arraycopy(header, 0, payload, 0, 7);
+        System.arraycopy(this.stream.buffer, 0, payload, 7, this.stream.length);
+        
+        OutputStream out = session.getOutputStream();
+        out.write(payload, 0, 0);
+    }
+    
+    private byte[] writeHeader(int id, int length, int version) {
+        byte[] header = new byte[7];
+
+        header[0] = (byte) ((id >>> 8) & 0xFF);
+        header[1] = (byte) (id & 0xFF);
+
+        header[2] = (byte) ((length >>> 16) & 0xFF);
+        header[3] = (byte) ((length >>> 8) & 0xFF);
+        header[4] = (byte) (length & 0xFF);
+
+        header[5] = (byte) ((version >>> 8) & 0xFF);
+        header[6] = (byte) (version & 0xFF);
+
+        return header;
+    }
+}

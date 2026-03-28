@@ -6,8 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class ByteStream extends ChecksumEncoder {
-    byte[] buffer;
-    int length = 0;
+    public byte[] buffer;
+    public int length = 0;
     int offset = 0;
     int bitOffset = 0;
     
