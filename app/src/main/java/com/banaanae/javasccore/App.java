@@ -1,5 +1,6 @@
 package com.banaanae.javasccore;
 
+import com.banaanae.javasccore.logic.server.LogicConfig;
 import java.io.IOException;
 
 public class App {
@@ -7,6 +8,6 @@ public class App {
         System.out.println("Starting server");
         
         final Server server = new Server();
-        server.start(9339);
+        server.start(LogicConfig.port);
     }
 }

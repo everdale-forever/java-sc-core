@@ -6,8 +6,8 @@ import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
 import java.net.Socket;
 
 public class PiranhaMessage extends Messaging {
-    Socket session;
-    ByteStream stream;
+    public Socket session;
+    public ByteStream stream;
     public PiranhaMessage(Socket session) {
         super(session);
         this.session = session;
@@ -17,6 +17,8 @@ public class PiranhaMessage extends Messaging {
     public void encode() {}
     public void decode() {}
     public void execute() {}
-    public void getMessageType() {}
-    public void getMessageVersion() {}
+    @Override
+    public int getMessageType() {return 0;}
+    @Override
+    public int getMessageVersion() {return 0;}
 }
