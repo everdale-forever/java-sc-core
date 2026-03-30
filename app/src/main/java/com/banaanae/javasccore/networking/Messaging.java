@@ -1,5 +1,6 @@
 package com.banaanae.javasccore.networking;
 
+import com.banaanae.javasccore.titan.ArrayUtils;
 import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,9 +49,7 @@ public abstract class Messaging {
         
         this.encode();
         byte[] header = writeHeader(this.getMessageType(), this.stream.length, this.getMessageVersion());
-        byte[] payload = new byte[7 + this.stream.length];
-        System.arraycopy(header, 0, payload, 0, 7);
-        System.arraycopy(this.stream.buffer, 0, payload, 7, this.stream.length);
+        byte[] payload = ArrayUtils.concat(header, this.stream.buffer);
         
         return payload;
     }

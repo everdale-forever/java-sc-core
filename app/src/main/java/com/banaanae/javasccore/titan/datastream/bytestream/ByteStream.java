@@ -1,5 +1,6 @@
 package com.banaanae.javasccore.titan.datastream.bytestream;
 
+import com.banaanae.javasccore.titan.ArrayUtils;
 import com.banaanae.javasccore.titan.LogicLong;
 import com.banaanae.javasccore.titan.datastream.checksumencoder.ChecksumEncoder;
 import java.nio.charset.StandardCharsets;
@@ -92,7 +93,8 @@ public class ByteStream extends ChecksumEncoder {
 
         this.writeInt(bytes.length);
         this.ensureCapacity(bytes.length);
-        System.arraycopy(bytes, 0, this.buffer, this.offset, bytes.length);
+        ArrayUtils.concat(buffer, bytes);
+        
         this.offset += bytes.length;
     }
     
@@ -249,9 +251,7 @@ public class ByteStream extends ChecksumEncoder {
     }
     
     public void writeBytesWithoutLength(byte[] bytesValue) {
-        byte[] mergedArray = new byte[buffer.length + bytesValue.length];
-        System.arraycopy(buffer, 0, mergedArray, 0, buffer.length);
-        System.arraycopy(bytesValue, 0, mergedArray, buffer.length, bytesValue.length);
+        ArrayUtils.concat(buffer, bytesValue);
         this.offset += bytesValue.length;
     }
     
@@ -332,7 +332,7 @@ public class ByteStream extends ChecksumEncoder {
 
         int newCapacity = Math.max(required, buffer.length * 2);
         byte[] newBuf = new byte[newCapacity];
-        System.arraycopy(buffer, 0, newBuf, 0, buffer.length);
+        ArrayUtils.concat(buffer, newBuf);
         this.buffer = newBuf;
     }
 }
