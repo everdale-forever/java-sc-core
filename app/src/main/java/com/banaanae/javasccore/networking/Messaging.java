@@ -4,14 +4,14 @@ import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 public abstract class Messaging {
     protected Socket session;
     protected ByteStream stream; 
     
     public abstract void encode();
+    public abstract void decode();
+    public abstract void execute();
     public abstract int getMessageType();
     public abstract int getMessageVersion();
     
@@ -19,10 +19,31 @@ public abstract class Messaging {
         this.session = session;
     }
     
-    public void send(boolean doNotEncrypt) throws IOException {
+    public void send(boolean doNotEncrypt) {
+        try {
+            byte[] payload = getPayload(doNotEncrypt);
+            
+            OutputStream out = session.getOutputStream();
+            out.write(payload, 0, 0);
+        } catch (IOException ex) {
+            System.getLogger(Messaging.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+    }
+    
+    public void send() {
+        try {
+            byte[] payload = getPayload(false);
+            
+            OutputStream out = session.getOutputStream();
+            out.write(payload, 0, 0);
+        } catch (IOException ex) {
+            System.getLogger(Messaging.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+    }
+    
+    private byte[] getPayload(boolean doNotEncrypt) throws IOException {
         if (this.getMessageType() < 20000) {
-            System.out.println("[Error] Attempted to send client message");
-            return;
+            throw new IOException("Attempted to send client message");
         }
         
         this.encode();
@@ -31,8 +52,7 @@ public abstract class Messaging {
         System.arraycopy(header, 0, payload, 0, 7);
         System.arraycopy(this.stream.buffer, 0, payload, 7, this.stream.length);
         
-        OutputStream out = session.getOutputStream();
-        out.write(payload, 0, 0);
+        return payload;
     }
     
     private byte[] writeHeader(int id, int length, int version) {

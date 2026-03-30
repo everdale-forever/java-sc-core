@@ -34,11 +34,7 @@ public class ClientHelloMessage extends PiranhaMessage {
     
     @Override
     public void execute() {
-        try {
-            new ServerHelloMessage(session).send(true);
-        } catch (IOException ex) {
-            System.getLogger(ClientHelloMessage.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-        }
+        new ServerHelloMessage(session).send(true);
     }
     
     @Override

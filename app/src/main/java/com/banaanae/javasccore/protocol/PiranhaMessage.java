@@ -2,23 +2,25 @@ package com.banaanae.javasccore.protocol;
 
 import com.banaanae.javasccore.networking.Messaging;
 import com.banaanae.javasccore.titan.datastream.DataStream;
-import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
 import java.net.Socket;
 
-public class PiranhaMessage extends Messaging {
-    public Socket session;
-    public ByteStream stream;
+public abstract class PiranhaMessage extends Messaging {
     public PiranhaMessage(Socket session) {
         super(session);
         this.session = session;
         this.stream = DataStream.getByteStream(new byte[0]);
     }
     
+    @Override
     public void encode() {}
+    @Override
     public void decode() {}
+    @Override
     public void execute() {}
     @Override
-    public int getMessageType() {return 0;}
+    public abstract int getMessageType();
     @Override
-    public int getMessageVersion() {return 0;}
+    public int getMessageVersion() {
+        return 0;
+    };
 }
