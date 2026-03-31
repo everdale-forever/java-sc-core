@@ -1,8 +1,8 @@
-package com.banaanae.javasccore.titan.logicreflector;
+package com.banaanae.javasccore.titan.reflector;
 
 import com.banaanae.javasccore.titan.json.LogicJSONNode;
 import com.banaanae.javasccore.titan.json.LogicJSONObject;
-import com.banaanae.javasccore.titan.logicreflector.LogicReflector;
+import com.banaanae.javasccore.titan.reflector.LogicReflector;
 
 public class LogicJSONOutReflector extends LogicReflector {
     Object currentObject;

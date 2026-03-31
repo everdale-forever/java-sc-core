@@ -7,11 +7,11 @@ public class CSVColumn {
     private static final int BOOLEAN_VALUE_NOT_SET = 0x2;
     private static final int INT_VALUE_NOT_SET = 0x7FFFFFFF;
 
-    private List<Integer> booleanValues;
-    private List<Integer> integerValues;
-    private List<String> stringValues;
+    private final List<Integer> booleanValues;
+    private final List<Integer> integerValues;
+    private final List<String> stringValues;
 
-    private int columnType;
+    private final int columnType;
 
     public CSVColumn(int columnType, int size) {
         this.columnType = columnType;
@@ -27,16 +27,9 @@ public class CSVColumn {
 
     public void addEmptyValue() {
         switch (this.columnType) {
-            case -1:
-            case 0:
-                this.stringValues.add("");
-                break;
-            case 1:
-                this.integerValues.add(INT_VALUE_NOT_SET);
-                break;
-            case 2:
-                this.booleanValues.add(BOOLEAN_VALUE_NOT_SET);
-                break;
+            case -1, 0 -> this.stringValues.add("");
+            case 1 -> this.integerValues.add(INT_VALUE_NOT_SET);
+            case 2 -> this.booleanValues.add(BOOLEAN_VALUE_NOT_SET);
         }
     }
 
@@ -54,28 +47,27 @@ public class CSVColumn {
 
     public int getArraySize(int startOffset, int endOffset) {
         switch (this.columnType) {
-            case -1:
-            case 0:
+            case -1, 0 -> {
                 for (int i = endOffset - 1; i + 1 > startOffset; i--) {
                     if (this.stringValues.get(i).length() > 0) {
                         return i - startOffset + 1;
                     }
                 }
-                break;
-            case 1:
+            }
+            case 1 -> {
                 for (int i = endOffset - 1; i + 1 > startOffset; i--) {
                     if (!this.integerValues.get(i).equals(INT_VALUE_NOT_SET)) {
                         return i - startOffset + 1;
                     }
                 }
-                break;
-            case 2:
+            }
+            case 2 -> {
                 for (int i = endOffset - 1; i + 1 > startOffset; i--) {
                     if (!this.booleanValues.get(i).equals(BOOLEAN_VALUE_NOT_SET)) {
                         return i - startOffset + 1;
                     }
                 }
-                break;
+            }
         }
         return 0;
     }
@@ -93,17 +85,12 @@ public class CSVColumn {
     }
 
     public int getSize() {
-        switch (this.columnType) {
-            case -1:
-            case 0:
-                return this.stringValues.size();
-            case 1:
-                return this.integerValues.size();
-            case 2:
-                return this.booleanValues.size();
-            default:
-                return 0;
-        }
+        return switch (this.columnType) {
+            case -1, 0 -> this.stringValues.size();
+            case 1 -> this.integerValues.size();
+            case 2 -> this.booleanValues.size();
+            default -> 0;
+        };
     }
 
     public int getColumnType() {
