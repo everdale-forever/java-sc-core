@@ -37,7 +37,7 @@ public class ByteStream extends ChecksumEncoder {
         this.buffer[this.offset++] = (byte) (intValue >>> 24);
         this.buffer[this.offset++] = (byte) (intValue >>> 16);
         this.buffer[this.offset++] = (byte) (intValue >>> 8);
-        this.buffer[this.offset++] = (byte) (intValue);  
+        this.buffer[this.offset++] = (byte) (intValue);
     }
     
     public int readIntLE() {
@@ -87,13 +87,13 @@ public class ByteStream extends ChecksumEncoder {
             System.out.println(String.format("ByteStream::writeString invalid string byte length %d", bytes.length));
             return;
         } else if (bytes.length == 0) {
-            this.writeInt(-1);
+            writeInt(-1);
             return;
         }
 
-        this.writeInt(bytes.length);
-        this.ensureCapacity(bytes.length);
-        ArrayUtils.concat(buffer, bytes);
+        writeInt((int) bytes.length);
+        ensureCapacity(bytes.length);
+        System.arraycopy(bytes, 0, buffer, offset, bytes.length);
         
         this.offset += bytes.length;
     }
@@ -327,12 +327,10 @@ public class ByteStream extends ChecksumEncoder {
     }
     
     private void ensureCapacity(int capacity) {
-        int required = offset + capacity;
-        if (required <= buffer.length) return;
-
-        int newCapacity = Math.max(required, buffer.length * 2);
-        byte[] newBuf = new byte[newCapacity];
-        ArrayUtils.concat(buffer, newBuf);
-        this.buffer = newBuf;
+        final int len = this.buffer.length;
+        
+        if (offset + capacity > len) {
+            this.buffer = ArrayUtils.concat(buffer, new byte[capacity]);
+        }
     }
 }
