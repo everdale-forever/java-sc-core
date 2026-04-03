@@ -251,7 +251,7 @@ public class ByteStream extends ChecksumEncoder {
     }
     
     public void writeBytesWithoutLength(byte[] bytesValue) {
-        ArrayUtils.concat(buffer, bytesValue);
+        buffer = ArrayUtils.concat(buffer, bytesValue);
         this.offset += bytesValue.length;
     }
     

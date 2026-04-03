@@ -1,10 +1,12 @@
 package com.banaanae.javasccore.protocol.messages.client.auth;
 
+import com.banaanae.javasccore.Server.Client;
+import com.banaanae.javasccore.logic.server.LogicVersion;
 import com.banaanae.javasccore.protocol.PiranhaMessage;
+import com.banaanae.javasccore.protocol.messages.server.auth.LoginFailedMessage;
 import com.banaanae.javasccore.protocol.messages.server.auth.ServerHelloMessage;
 import com.banaanae.javasccore.titan.datastream.DataStream;
-import java.io.IOException;
-import java.net.Socket;
+import com.banaanae.javasccore.titan.enums.LoginFailedReason;
 
 public class ClientHelloMessage extends PiranhaMessage {
     int protocol;
@@ -16,7 +18,7 @@ public class ClientHelloMessage extends PiranhaMessage {
     int deviceType;
     int appStore;
     
-    public ClientHelloMessage(byte[] payload, Socket session) {
+    public ClientHelloMessage(byte[] payload, Client session) {
         super(session);
         this.stream = DataStream.getByteStream(payload);
     }
@@ -34,6 +36,15 @@ public class ClientHelloMessage extends PiranhaMessage {
     
     @Override
     public void execute() {
+        if (this.major != LogicVersion.major) {
+            final LoginFailedMessage loginFailed = new LoginFailedMessage(this.session);
+            loginFailed.errorCode = LoginFailedReason.UPDATE.getCode();
+            loginFailed.updateUri = "https://github.com/everdale-forever/java-sc-core";
+            loginFailed.reason = "Yippee there's an update!";
+            loginFailed.send(true);
+            return;
+        }
+        
         new ServerHelloMessage(session).send(true);
     }
     

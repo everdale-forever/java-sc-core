@@ -31,4 +31,32 @@ public final class ArrayUtils {
 
         return result;
     }
+    
+    public static long readUIntBE(byte[] buf, int offset, int length) {
+        if (length < 1 || length > 8) throw new IllegalArgumentException("length 1..8");
+        if (offset < 0 || offset + length > buf.length) throw new IndexOutOfBoundsException();
+        long val = 0;
+        for (int i = 0; i < length; i++) {
+            val = (val << 8) | (buf[offset + i] & 0xFFL);
+        }
+        return val;
+    }
+    
+    public static int readUInt16BE(byte[] buf, int offset) {
+        if (offset < 0 || offset + 2 > buf.length) throw new IndexOutOfBoundsException();
+        return ((buf[offset] & 0xFF) << 8) | (buf[offset + 1] & 0xFF);
+    }
+
+    
+    public static String toHex(byte[] bytes) {
+        char[] hex = new char[bytes.length * 2];
+        final char[] HEX_CHARS = "0123456789ABCDEF".toCharArray();
+        for (int i = 0; i < bytes.length; i++) {
+            int v = bytes[i] & 0xFF;
+            hex[i * 2]     = HEX_CHARS[v >>> 4];
+            hex[i * 2 + 1] = HEX_CHARS[v & 0x0F];
+        }
+        return new String(hex);
+    }
+
 }

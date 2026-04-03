@@ -1,13 +1,14 @@
 package com.banaanae.javasccore.networking;
 
+import com.banaanae.javasccore.Debugger;
+import com.banaanae.javasccore.Server.Client;
 import com.banaanae.javasccore.titan.ArrayUtils;
 import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.Socket;
 
 public abstract class Messaging {
-    protected Socket session;
+    protected Client session;
     protected ByteStream stream; 
     
     public abstract void encode();
@@ -16,7 +17,7 @@ public abstract class Messaging {
     public abstract int getMessageType();
     public abstract int getMessageVersion();
     
-    public Messaging(Socket session) {
+    public Messaging(Client session) {
         this.session = session;
     }
     
@@ -25,7 +26,8 @@ public abstract class Messaging {
             byte[] payload = getPayload(doNotEncrypt);
             
             OutputStream out = session.getOutputStream();
-            out.write(payload, 0, 0);
+            out.write(payload, 0, payload.length);
+            out.flush();
         } catch (IOException ex) {
             System.getLogger(Messaging.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
@@ -36,20 +38,23 @@ public abstract class Messaging {
             byte[] payload = getPayload(false);
             
             OutputStream out = session.getOutputStream();
-            out.write(payload, 0, 0);
+            out.write(payload, 0, payload.length);
+            out.flush();
         } catch (IOException ex) {
             System.getLogger(Messaging.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
     }
     
-    private byte[] getPayload(boolean doNotEncrypt) throws IOException {
+    private byte[] getPayload(boolean doNotEncrypt) {
         if (this.getMessageType() < 20000) {
-            throw new IOException("Attempted to send client message");
+            Debugger.error("Attempted to send client message");
         }
         
         this.encode();
-        byte[] header = writeHeader(this.getMessageType(), this.stream.length, this.getMessageVersion());
+        byte[] header = writeHeader(this.getMessageType(), this.stream.buffer.length, this.getMessageVersion());
         byte[] payload = ArrayUtils.concat(header, this.stream.buffer);
+        payload = ArrayUtils.concat(payload, new byte[] {(byte) 0xFF, (byte) 0xFF
+                , (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00});
         
         return payload;
     }

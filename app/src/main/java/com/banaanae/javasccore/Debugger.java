@@ -1,0 +1,12 @@
+package com.banaanae.javasccore;
+
+public class Debugger {
+    public static void warning(String text) {
+        System.out.println("[Warning] " + text);
+    }
+    
+    public static void error(String text) {
+        System.err.println("[Error] " + text);
+        throw new RuntimeException(text);
+    }
+}

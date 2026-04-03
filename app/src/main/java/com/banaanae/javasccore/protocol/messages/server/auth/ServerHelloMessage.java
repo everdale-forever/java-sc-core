@@ -1,11 +1,11 @@
 package com.banaanae.javasccore.protocol.messages.server.auth;
 
+import com.banaanae.javasccore.Server.Client;
 import com.banaanae.javasccore.protocol.PiranhaMessage;
 import com.banaanae.javasccore.titan.datastream.DataStream;
-import java.net.Socket;
 
 public class ServerHelloMessage extends PiranhaMessage {
-    public ServerHelloMessage(Socket session) {
+    public ServerHelloMessage(Client session) {
         super(session);
         this.stream = DataStream.getByteStream(new byte[0]);
     }
