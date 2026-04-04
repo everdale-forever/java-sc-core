@@ -4,4 +4,5 @@ public abstract class LogicJSONNode {
     public LogicJSONNode() {}
     
     public abstract int destruct();
+    public abstract int getType();
 }

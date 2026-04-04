@@ -94,6 +94,10 @@ public class LogicLong {
         return (high << 32) | (low < 0 ? low | 0x80000000 : low & 0x7FFFFFFF);
     }
     
+    public long toLong() {
+        return ((long) high << 32) | ((long) low & 0xFFFFFFFFL);
+    }
+    
     public String toString(int high, int low) {
         return String.format("LogicLong(%d, %d)", high, low);
     }
