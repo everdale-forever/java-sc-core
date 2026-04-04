@@ -73,8 +73,6 @@ public class Server {
             Socket session = server.accept();
             Client client = new Client(session);
             
-            client.log("Client connected (sessionId: " + client.id + ")");
-            
             client.setTcpNoDelay(true);
             client.setKeepAlive(true);
             client.setSoTimeout(15000); // TODO: Config
@@ -82,6 +80,8 @@ public class Server {
             client.id = getLastSessionId() + 1;
             client.queue = new Queue(1024, false);
             sessions.put(client.id, client);
+            
+            client.log("Client connected (sessionId: " + client.id + ")");
             
             client.handler = new MessageHandler(client);
             
@@ -129,8 +129,19 @@ public class Server {
         }
     }
     
-    private void onClose(Client client) { /* cleanup */ }
-    private void onError(Client client, IOException e) { /* error handling */ }
+    private void onClose(Client client) {
+        destroySession(client, "log", "Client disconnected.");
+    }
+    
+    private void onError(Client client, IOException error) {
+        if (error.getMessage().contains("ECONNRESET")) {
+            destroySession(client, "log", "Client disconnected.");
+        }
+
+        try {
+            destroySession(client, "err", "A wild error!\n" + error.getMessage());
+        } catch (Exception err) {}
+    }
 
     public void stop() throws IOException {
         if (server != null && !server.isClosed()) server.close();
@@ -140,5 +151,23 @@ public class Server {
         Set sessionIds = sessions.keySet();
         
         return (int) (sessions.isEmpty() ? 0 : Collections.max(sessionIds));
+    }
+    
+    public void destroySession(Client session, String logType, String reason) {
+        if (session == null)
+            return;
+        
+        switch (logType) {
+            case "warn" -> session.warn(reason);
+            case "error" -> session.error(reason);
+            default -> session.log(reason);
+        }
+        
+        try {
+            session.close();
+        } catch (IOException ex) {
+            System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+        sessions.remove(session.id);
     }
 }
