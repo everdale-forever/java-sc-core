@@ -1,4 +1,4 @@
-package com.banaanae.javasccore;
+package com.banaanae.javasccore.titan;
 
 public class Debugger {
     public static void warning(String text) {

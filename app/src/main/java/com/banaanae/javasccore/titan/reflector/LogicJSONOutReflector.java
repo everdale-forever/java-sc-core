@@ -1,6 +1,6 @@
 package com.banaanae.javasccore.titan.reflector;
 
-import com.banaanae.javasccore.Debugger;
+import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.titan.LogicCompressedString;
 import com.banaanae.javasccore.titan.LogicLong;
 import com.banaanae.javasccore.titan.json.*;

@@ -1,6 +1,6 @@
 package com.banaanae.javasccore.titan.reflector;
 
-import com.banaanae.javasccore.Debugger;
+import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.titan.GlobalID;
 
 public class LogicReflector {

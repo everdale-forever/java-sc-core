@@ -1,6 +1,6 @@
 package com.banaanae.javasccore.titan.json;
 
-import com.banaanae.javasccore.Debugger;
+import com.banaanae.javasccore.titan.Debugger;
 
 public class LogicJSONArray extends LogicJSONNode {
     LogicJSONNode[] items;

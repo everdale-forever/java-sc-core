@@ -1,6 +1,6 @@
 package com.banaanae.javasccore.networking;
 
-import com.banaanae.javasccore.Debugger;
+import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.Server.Client;
 import com.banaanae.javasccore.titan.ArrayUtils;
 import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
