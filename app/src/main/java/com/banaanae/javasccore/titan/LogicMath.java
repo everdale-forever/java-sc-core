@@ -33,6 +33,63 @@ public class LogicMath {
         0xFD, 0xFE, 0xFE, 0xFF
     };
     
+    private static final int[] SIN_TABLE = {
+        0x000, 0x012, 0x024, 0x036, 0x047, 0x059, 0x06B, 0x07D,
+        0x08F, 0x0A0, 0x0B2, 0x0C3, 0x0D5, 0x0E6, 0x0F8, 0x109,
+        0x11A, 0x12B, 0x13C, 0x14D, 0x15E, 0x16F, 0x180, 0x190,
+        0x1A0, 0x1B1, 0x1C1, 0x1D1, 0x1E1, 0x1F0, 0x200, 0x20F,
+        0x21F, 0x22E, 0x23D, 0x24B, 0x25A, 0x268, 0x276, 0x284,
+        0x292, 0x2A0, 0x2AD, 0x2BA, 0x2C7, 0x2D4, 0x2E1, 0x2ED,
+        0x2F9, 0x305, 0x310, 0x31C, 0x327, 0x332, 0x33C, 0x347,
+        0x351, 0x35B, 0x364, 0x36E, 0x377, 0x380, 0x388, 0x390,
+        0x398, 0x3A0, 0x3A7, 0x3AF, 0x3B5, 0x3BC, 0x3C2, 0x3C8,
+        0x3CE, 0x3D3, 0x3D8, 0x3DD, 0x3E2, 0x3E6, 0x3EA, 0x3ED,
+        0x3F0, 0x3F3, 0x3F6, 0x3F8, 0x3FA, 0x3FC, 0x3FE, 0x3FF,
+        0x3FF, 0x400, 0x400
+    };
+    
+    private static final int[] ATAN_TABLE = {
+        0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04,
+        0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08,
+        0x08, 0x08, 0x09, 0x09, 0x0A, 0x0A, 0x0B, 0x0B, 0x0B,
+        0x0C, 0x0C, 0x0D, 0x0D, 0x0E, 0x0E, 0x0E, 0x0F, 0x0F,
+        0x10, 0x10, 0x11, 0x11, 0x11, 0x12, 0x12, 0x13, 0x13,
+        0x13, 0x14, 0x14, 0x15, 0x15, 0x15, 0x16, 0x16, 0x16,
+        0x17, 0x17, 0x18, 0x18, 0x18, 0x19, 0x19, 0x19, 0x1A,
+        0x1A, 0x1B, 0x1B, 0x1B, 0x1C, 0x1C, 0x1C, 0x1D, 0x1D,
+        0x1D, 0x1E, 0x1E, 0x1E, 0x1F, 0x1F, 0x1F, 0x20, 0x20,
+        0x20, 0x21, 0x21, 0x21, 0x22, 0x22, 0x22, 0x23, 0x23,
+        0x23, 0x23, 0x24, 0x24, 0x24, 0x25, 0x25, 0x25, 0x25,
+        0x26, 0x26, 0x26, 0x27, 0x27, 0x27, 0x27, 0x28, 0x28,
+        0x28, 0x28, 0x29, 0x29, 0x29, 0x29, 0x2A, 0x2A, 0x2A,
+        0x2A, 0x2B, 0x2B, 0x2B, 0x2B, 0x2C, 0x2C, 0x2C, 0x2C,
+        0x2D, 0x2D, 0x2D
+    };
+    
+    private static final int[] BITS_IN_BYTE = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1,
+        2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2,
+        2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3,
+        4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3,
+        2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3,
+        4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4,
+        4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5,
+        6, 4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4,
+        2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3,
+        4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4,
+        4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5,
+        6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5,
+        4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5,
+        6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6,
+        6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7,
+        8
+    };
+    
+    private static final int[] DAYS_IN_MONTH = {
+        0x1F, 0x1C, 0x1F, 0x1E, 0x1F, 0x1E, 0x1F, 0x1F, 0x1E,
+        0x1F, 0x1E, 0x1F
+    };
+    
     public static int sign(int value) {
         if (value > 0)
             return 1;
@@ -149,19 +206,212 @@ public class LogicMath {
         return result;
     }
     
-    // TODO:
-    // sin
-    // cos
-    // getDistanceToLine
-    // getDistanceSquareToLine
-    // getRotatedX
-    // getRoatedY
-    // mulDiv
-    // mulDivReduced
-    // getAngle
-    // getAngleBetween
-    // normalizeAngle180
-    // normalizeAngle360
-    // getDaysInMonth
-    // getBitsInInteger
+    public static LogicVector2 mulDivReduced(int first, int second, int multiplier, LogicVector2 output) {
+        if (first == 0 || second == 0)
+            return output.set(0, 0);
+        int v5, v6;
+        if (first <= second) {
+            v5 = first;
+            v6 = second;
+        } else {
+            v5 = second;
+            v6 = first;
+        }
+        int v7 = multiplier / v5;
+        int v9 = multiplier % v5;
+        if (v6 <= v7) {
+            if (v6 != v7 || v9 != 0)
+                return output.set(0, v5 * v6);
+            return output.set(1, 0);
+        }
+        int v10 = v6 / v7;
+        int v11 = v6 % v7 * v5;
+        final LogicVector2 temp = new LogicVector2();
+        mulDivReduced(v10, v9, multiplier, temp);
+        int v12;
+        if (v11 >= temp.y)
+            v12 = 0;
+        else
+            v12 = multiplier;
+        return output.set(v10 - temp.x - (v11 < temp.y ? 1 : 0), v11 + v12 - temp.y);
+    }
+    
+    public static int mulDiv(int a1, int a2, int a3) {
+        int v3 = 1;
+        if (a1 < 0)
+            v3 = -1;
+        if (a2 < 0)
+            v3 = -v3;
+        int v4 = a3;
+        int v5 = a2;
+        if (a3 < 0) {
+            v3 = -v3;
+            v4 = -v4;
+        }
+        int v6 = a1;
+        if (a2 < 0)
+            v5 = -a2;
+        if (a1 < 0)
+            v6 = -a1;
+        int v7 = 0;
+        if (v6 >= v4) {
+            int v8 = v6 / v4;
+            v6 %= v4;
+            v7 = v8 * v5;
+        }
+        if (v5 >= v4) {
+            v7 += v5 / v4 * v6;
+            v5 %= v4;
+        }
+        final LogicVector2 vector = new LogicVector2();
+        mulDivReduced(v6, v5, v4, vector);
+        return (vector.x + v7) * v3;
+    }
+    
+    public static int normalizeAngle180(int angle) {
+        int result = angle % 360 + (angle % 360 < 0 ? 360 : 0);
+        if (result > 179)
+            result -= 360;
+        return result;
+    }
+    
+    public static int normalizeAngle360(int angle) {
+        return angle % 360 + (angle % 360 < 0 ? 360 : 0);
+    }
+    
+    public static int getRotatedX(int x, int y, int angle) {
+        return (x * cos(angle) - y * sin(angle)) / 1024;
+    }
+    
+    public static int getRotatedY(int x, int y, int angle) {
+        return (x * sin(angle) + y * cos(angle)) / 1024;
+    }
+    
+    public static int sin(int angle) {
+        int normal = angle % 360 + (angle % 360 < 0 ? 360 : 0);
+        if (angle > 179) {
+            int v3 = normal - 180;
+            if (v3 > 90)
+                v3 = 360 - normal;
+            return -SIN_TABLE[v3];
+        } else {
+            if (normal > 90)
+                normal = 180 - normal;
+            return SIN_TABLE[normal];
+        }
+    }
+    
+    public static int sin(int angle, int amplitude) {
+        return sin(angle) * amplitude / 1024;
+    }
+    
+    public static int cos(int angle) {
+        int normal = (angle + 90) % 360 + ((angle + 90) % 360 < 0 ? 360 : 0);
+        if (angle > 179) {
+            int v3 = normal - 180;
+            if (v3 > 90)
+                v3 = 360 - normal;
+            return -SIN_TABLE[v3];
+        } else {
+            if (normal > 90)
+                normal = 180 - normal;
+            return SIN_TABLE[normal];
+        }
+    }
+    
+    public static int cos(int angle, int amplitude) {
+        return cos(angle) * amplitude / 1024;
+    }
+    
+    public static int getAngle(int x, int y) {
+        if ((y | x) == 0)
+            return 0;
+        if (x >= 1 && (y & 0x80000000) == 0) {
+            if (y >= x)
+                return 90 - ATAN_TABLE[(x << 7) / y];
+            else
+                return ATAN_TABLE[(x << 7) / y];
+        }
+        int absX = LogicMath.abs(x);
+        if (x <= 0 && y >= 1) {
+            if (absX >= y)
+                return 180 - ATAN_TABLE[(y << 7) / absX];
+            else
+                return 90 + ATAN_TABLE[(absX << 7) / y];
+        }
+        int absY = LogicMath.abs(y);
+        if ( x < 0 && y <= 0 ) {
+            if ( absY < absX )
+                return 180 + ATAN_TABLE[(absY << 7) / absX];
+            if (absY != 0)
+                return 270 - ATAN_TABLE[(absX << 7) / absY];
+            return 0;
+        }
+        if ( absX < absY )
+            return 270 + ATAN_TABLE[(absX << 7) / absY];
+        if (absX == 0)
+            return 0;
+        int v5 = (360 - ATAN_TABLE[(absY << 7) / absX]) % 360;
+        if ( v5 >= 0 )
+            return v5;
+        else
+            return v5 + 360;
+    }
+    
+    public static int getAngleBetween(int angle1, int angle2) {
+        int result = (angle1 - angle2) % 360 + ((angle1 - angle2) % 360 < 0 ? 360 : 0);
+        if ( result > 179 )
+            result -= 360;
+        if ( result < 0 )
+            return -result;
+        return result;
+    }
+    
+    public static int getDistanceSquareToLine(LogicVector2 a1, LogicVector2 a2, LogicVector2 a3) {
+        int v3 = a1.x;
+        int v4 = a2.x;
+        int v5 = a1.y;
+        int v6 = a2.x - v3;
+        int v7 = a2.y;
+        int v8 = v7 - v5;
+        int v9 = a3.x - v3;
+        int v10 = v6 * v6 + v8 * v8;
+        int v11 = a3.y;
+        int v12 = v11 - v5;
+        if (v10 == 0)
+            return v9 * v9 + v12 * v12;
+        int v13 = (v9 * v6 + v12 * v8);
+        if (v13 <= 0)
+            return v9 * v9 + v12 * v12;
+        if (v13 >= v10)
+            return (a3.x - v4) * (a3.x - v4) + (v11 - v7) * (v11 - v7);
+        final LogicVector2 temp = new LogicVector2();
+        mulDivReduced(v13, v13, v10, temp);
+        return v9 * v9 + v12 * v12 - temp.x;
+    }
+    
+    public static int getDistanceToLine(LogicVector2 a1, LogicVector2 a2, LogicVector2 a3) {
+        return LogicMath.sqrt(getDistanceSquareToLine(a1, a2, a3));
+    }
+    
+    /**
+     * Gets the number of days in a month
+     * @param month Month index (Jan = 0)
+     * @param isLeapYear If the year is a leap year
+     * @return
+     */
+    public static int getDaysInMonth(int month, boolean isLeapYear) {
+        if (month == 1 && isLeapYear)
+            return 29;
+        else
+            return DAYS_IN_MONTH[month];
+    }
+    
+    public static int getBitsInInteger(int value) {
+        int b0 = value & 0xFF;
+        int b1 = (value >>> 8) & 0xFF;
+        int b2 = (value >>> 16) & 0xFF;
+        int b3 = (value >>> 24) & 0xFF;
+        return BITS_IN_BYTE[b0] + BITS_IN_BYTE[b1] + BITS_IN_BYTE[b2] + BITS_IN_BYTE[b3];
+    }
 }
