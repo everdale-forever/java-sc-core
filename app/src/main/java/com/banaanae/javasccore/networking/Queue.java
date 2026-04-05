@@ -3,11 +3,11 @@ package com.banaanae.javasccore.networking;
 import com.banaanae.javasccore.titan.ArrayUtils;
 
 public class Queue {
-    public final int QUEUE_FREE = 0;
-    public final int QUEUE_BUSY = 1;
-    public final int QUEUE_OVERFILLED = 2;
-    public final int QUEUE_PUSHED_MORE_THAN_EXPECTED = 3;
-    public final int QUEUE_DETECTED_MERGED_PACKETS = 4;
+    public static final int QUEUE_FREE = 0;
+    public static final int QUEUE_BUSY = 1;
+    public static final int QUEUE_OVERFILLED = 2;
+    public static final int QUEUE_PUSHED_MORE_THAN_EXPECTED = 3;
+    public static final int QUEUE_DETECTED_MERGED_PACKETS = 4;
     
     private String originalMerged = "";
     
@@ -30,7 +30,7 @@ public class Queue {
         this.data = ArrayUtils.concat(data, bytes);
         this.state = QUEUE_BUSY;
         
-        if (this.data.length > maxQueueSize && maxQueueSize > 0) {
+        if (size() > maxQueueSize && maxQueueSize > 0) {
             this.state = QUEUE_OVERFILLED;
         }
         
@@ -39,8 +39,12 @@ public class Queue {
         }
     }
     
+    public int size() {
+        return this.data.length;
+    }
+    
     public boolean isBusy() {
-        if (this.data.length == 0)
+        if (size() == 0)
             return false;
         
         return getQueueExpectedSize() > this.data.length - 7;
@@ -55,7 +59,7 @@ public class Queue {
                 ? unmergedPackets : this.data;
 
         this.data = new byte[0];
-        this.state = this.QUEUE_FREE;
+        this.state = QUEUE_FREE;
         this.unmergedPackets = new Packet[0];
         this.originalMerged = "";
 

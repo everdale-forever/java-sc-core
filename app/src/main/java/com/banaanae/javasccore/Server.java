@@ -1,5 +1,6 @@
 package com.banaanae.javasccore;
 
+import com.banaanae.javasccore.logic.server.LogicConfig;
 import com.banaanae.javasccore.protocol.LogicMessageFactory;
 import com.banaanae.javasccore.networking.MessageHandler;
 import com.banaanae.javasccore.networking.Packet;
@@ -18,12 +19,13 @@ import java.util.Set;
 
 public class Server {
     private ServerSocket server;
-    public HashMap sessions = new HashMap();
+    public static HashMap<Integer, Client> sessions = new HashMap<>();
     
     public class Client {
-    private final Socket socket;
+        private final Socket socket;
 
-    public Client(Socket socket) { this.socket = socket; }
+        public Client(Socket socket) { this.socket = socket; }
+        
         public int id;
         public Queue queue;
         public MessageHandler handler;
@@ -75,10 +77,10 @@ public class Server {
             
             client.setTcpNoDelay(true);
             client.setKeepAlive(true);
-            client.setSoTimeout(15000); // TODO: Config
+            client.setSoTimeout(LogicConfig.Session.TIMEOUT_SECONDS * 1000);
             
             client.id = getLastSessionId() + 1;
-            client.queue = new Queue(1024, false);
+            client.queue = new Queue(LogicConfig.Queue.MAX_SIZE, false);
             sessions.put(client.id, client);
             
             client.log("Client connected (sessionId: " + client.id + ")");
@@ -105,6 +107,21 @@ public class Server {
     
     private void onData(Client client, byte[] bytes) {
         client.queue.push(bytes);
+        
+        switch (client.queue.state) {
+            case Queue.QUEUE_OVERFILLED -> {
+                if (LogicConfig.Queue.WARN_ON_OVERFILL)
+                    client.warn("Queue is overfilled! Queue size:" + client.queue.size());
+                if (LogicConfig.Queue.DISCONNECT_ON_OVERFILL) {
+                    destroySession(client, "warn", "Queue is overfilled! Disconnecting...");
+                    return;
+                }
+            }
+            case Queue.QUEUE_PUSHED_MORE_THAN_EXPECTED -> client.warn(
+                    String.format("Queue got more bytes than expected! Expected: %d size. Got: %d size."
+                        , client.queue.getQueueExpectedSize(), client.queue.size()));
+            case Queue.QUEUE_DETECTED_MERGED_PACKETS -> client.warn("Queue detected merged packets!");
+        }
 
         if (!client.queue.isBusy()) {
             final Object queueBytes = client.queue.release();

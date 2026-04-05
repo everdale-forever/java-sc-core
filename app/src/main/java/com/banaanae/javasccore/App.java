@@ -6,7 +6,7 @@ import java.io.IOException;
 public class App {
     public static void main(String[] args)  {
         final Server server = new Server();
-        final int port = LogicConfig.port;
+        final int port = LogicConfig.PORT;
         
         try {
             server.start(port);
