@@ -16,6 +16,10 @@ repositories {
 }
 
 dependencies {
+    // For crypto:
+    implementation project(":Blake2b")
+    implementation project(":tweetnacl-java")
+
     // Use JUnit Jupiter for testing.
     testImplementation libs.junit.jupiter
 

@@ -12,3 +12,5 @@ plugins {
 
 rootProject.name = 'java-sc-core'
 include('app')
+include(":app", ":Blake2b")
+include(":app", ":tweetnacl-java")

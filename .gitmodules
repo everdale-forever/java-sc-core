@@ -1,0 +1,6 @@
+[submodule "Blake2b"]
+	path = Blake2b
+	url = https://github.com/alphazero/Blake2b.git
+[submodule "tweetnacl-java"]
+	path = tweetnacl-java
+	url = https://github.com/InstantWebP2P/tweetnacl-java.git
