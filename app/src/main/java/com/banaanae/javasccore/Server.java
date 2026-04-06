@@ -5,6 +5,7 @@ import com.banaanae.javasccore.protocol.LogicMessageFactory;
 import com.banaanae.javasccore.networking.MessageHandler;
 import com.banaanae.javasccore.networking.Packet;
 import com.banaanae.javasccore.networking.Queue;
+import com.banaanae.javasccore.titan.crypto.StreamEncrypter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
@@ -28,6 +29,7 @@ public class Server {
         
         public int id;
         public Queue queue;
+        public StreamEncrypter crypto;
         public MessageHandler handler;
         
         public void log(String text) {
@@ -79,6 +81,9 @@ public class Server {
             client.setKeepAlive(true);
             client.setSoTimeout(LogicConfig.Session.TIMEOUT_SECONDS * 1000);
             
+            client.crypto = LogicConfig.Crypto.ACTIVATED
+                    ? new StreamEncrypter(LogicConfig.Crypto.TYPE)
+                    : null;
             client.id = getLastSessionId() + 1;
             client.queue = new Queue(LogicConfig.Queue.MAX_SIZE, false);
             sessions.put(client.id, client);
@@ -129,7 +134,8 @@ public class Server {
             if (queueBytes instanceof Packet[] packets) {
                 client.log("Handling merged packets...");
                 for(Packet packet : packets) {
-                    // TODO Crypto
+                    if (LogicConfig.Crypto.ACTIVATED)
+                        packet.bytes = client.crypto.decrypt(packet.id, packet.bytes);
 
                     client.handler.handle(packet.id, packet.bytes);
                 }
@@ -140,7 +146,8 @@ public class Server {
 
             final Packet message = new Packet((byte[]) queueBytes);
 
-            // Crypto
+            if (LogicConfig.Crypto.ACTIVATED)
+                message.bytes = client.crypto.decrypt(message.id, message.bytes);
 
             client.handler.handle(message.id, message.bytes);
         }

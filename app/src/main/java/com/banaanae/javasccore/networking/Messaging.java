@@ -3,6 +3,7 @@ package com.banaanae.javasccore.networking;
 import com.banaanae.javasccore.Server;
 import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.Server.Client;
+import com.banaanae.javasccore.logic.server.LogicConfig;
 import com.banaanae.javasccore.titan.ArrayUtils;
 import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public abstract class Messaging {
     
     public void send(boolean doNotEncrypt) {
         try {
-            byte[] payload = getPayload(doNotEncrypt);
+            byte[] payload = getPayload(session, doNotEncrypt);
             
             OutputStream out = session.getOutputStream();
             out.write(payload, 0, payload.length);
@@ -40,7 +41,7 @@ public abstract class Messaging {
     
     public void send() {
         try {
-            byte[] payload = getPayload(false);
+            byte[] payload = getPayload(session, false);
             
             OutputStream out = session.getOutputStream();
             out.write(payload, 0, payload.length);
@@ -52,11 +53,11 @@ public abstract class Messaging {
     
     public void sendToSession(int sessionId, boolean doNotEncrypt) {
         try {
-            byte[] payload = getPayload(doNotEncrypt);
+            final Client client = Server.sessions.get(sessionId);
             
-            final Client session = Server.sessions.get(sessionId);
+            byte[] payload = getPayload(client, doNotEncrypt);
             
-            OutputStream out = session.getOutputStream();
+            OutputStream out = client.getOutputStream();
             out.write(payload, 0, payload.length);
             out.flush();
         } catch (IOException ex) {
@@ -66,11 +67,11 @@ public abstract class Messaging {
     
     public void sendToSession(int sessionId) {
         try {
-            byte[] payload = getPayload(false);
+            final Client client = Server.sessions.get(sessionId);
             
-            final Client session = Server.sessions.get(sessionId);
+            byte[] payload = getPayload(client, false);
             
-            OutputStream out = session.getOutputStream();
+            OutputStream out = client.getOutputStream();
             out.write(payload, 0, payload.length);
             out.flush();
         } catch (IOException ex) {
@@ -84,12 +85,13 @@ public abstract class Messaging {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
         
-        byte[] payload = getPayload(false);
-        
         if (!selectedSessions.isEmpty()) {
             for (int sessionId : Server.sessions.keySet()) {
                 try {
-                    OutputStream out = Server.sessions.get(sessionId).getOutputStream();
+                    Client client = Server.sessions.get(sessionId);
+                    byte[] payload = getPayload(client, doNotEncrypt);
+                    
+                    OutputStream out = client.getOutputStream();
                     out.write(payload, 0, payload.length);
                     out.flush();
                 } catch (IOException ex) {
@@ -105,12 +107,13 @@ public abstract class Messaging {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
         
-        byte[] payload = getPayload(false);
-        
         if (!selectedSessions.isEmpty()) {
             for (int sessionId : Server.sessions.keySet()) {
                 try {
-                    OutputStream out = Server.sessions.get(sessionId).getOutputStream();
+                    Client client = Server.sessions.get(sessionId);
+                    byte[] payload = getPayload(client, false);
+                    
+                    OutputStream out = client.getOutputStream();
                     out.write(payload, 0, payload.length);
                     out.flush();
                 } catch (IOException ex) {
@@ -121,11 +124,12 @@ public abstract class Messaging {
     }
     
     public void sendToAll(boolean doNotEncrypt) {
-        byte[] payload = getPayload(false); // TODO: Crypto
-        
         for (int sessionId : Server.sessions.keySet()) {
             try {
-                OutputStream out = Server.sessions.get(sessionId).getOutputStream();
+                Client client = Server.sessions.get(sessionId);
+                byte[] payload = getPayload(client, doNotEncrypt);
+                    
+                OutputStream out = client.getOutputStream();
                 out.write(payload, 0, payload.length);
                 out.flush();
             } catch (IOException ex) {
@@ -136,11 +140,12 @@ public abstract class Messaging {
     }
     
     public void sendToAll() {
-        byte[] payload = getPayload(false); // TODO: Crypto
-        
         for (int sessionId : Server.sessions.keySet()) {
             try {
-                OutputStream out = Server.sessions.get(sessionId).getOutputStream();
+                Client client = Server.sessions.get(sessionId);
+                byte[] payload = getPayload(client, false);
+                    
+                OutputStream out = client.getOutputStream();
                 out.write(payload, 0, payload.length);
                 out.flush();
             } catch (IOException ex) {
@@ -150,14 +155,17 @@ public abstract class Messaging {
             
     }
     
-    private byte[] getPayload(boolean doNotEncrypt) {
+    private byte[] getPayload(Client client, boolean doNotEncrypt) {
         if (this.getMessageType() < 20000) {
             Debugger.error("Attempted to send client message");
         }
         
         this.encode();
-        byte[] header = writeHeader(this.getMessageType(), this.stream.buffer.length, this.getMessageVersion());
-        byte[] payload = ArrayUtils.concat(header, this.stream.buffer);
+        int id = this.getMessageType();
+        byte[] header = writeHeader(id, this.stream.buffer.length, this.getMessageVersion());
+        byte[] payload = ArrayUtils.concat(header, LogicConfig.Crypto.ACTIVATED && !doNotEncrypt
+                ? client.crypto.encrypt(id, this.stream.buffer)
+                : this.stream.buffer);
         payload = ArrayUtils.concat(payload, new byte[] {(byte) 0xFF, (byte) 0xFF
                 , (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00});
         

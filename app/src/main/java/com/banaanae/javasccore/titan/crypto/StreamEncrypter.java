@@ -3,8 +3,9 @@ package com.banaanae.javasccore.titan.crypto;
 import com.banaanae.javasccore.titan.crypto.pepper.PepperEncrypter;
 import com.banaanae.javasccore.titan.enums.CryptoTypes;
 import com.banaanae.javasccore.titan.Debugger;
+import com.banaanae.javasccore.titan.crypto.rc4.RC4Encrypter;
 
-class StreamEncrypter {
+public class StreamEncrypter {
     Encrypter crypto;
     int cryptoType;
     
@@ -18,10 +19,10 @@ class StreamEncrypter {
         this.cryptoType = type;
 
         switch (type) {
-            case 0: // TODO
-                // TODO this.crypto = new RC4Encrypter();
+            case CryptoTypes.RC4:
+                this.crypto = new RC4Encrypter();
                 break;
-            case 1:
+            case CryptoTypes.PEPPER:
                 this.crypto = new PepperEncrypter();
                 break;
             default:
@@ -31,10 +32,9 @@ class StreamEncrypter {
 
     public byte[] encrypt(int type, byte[] bytes) {
         switch (this.cryptoType) {
-            case 0:
-                // return this.crypto.encrypt(bytes);
-                return bytes;
-            case 1:
+            case CryptoTypes.RC4:
+                return this.crypto.encrypt(type, bytes);
+            case CryptoTypes.PEPPER:
                 return this.crypto.encrypt(type, bytes);
             default:
                 Debugger.warning("Undefined crypto type: " + this.cryptoType);
@@ -45,8 +45,7 @@ class StreamEncrypter {
     public byte[] decrypt(int type, byte[] bytes) {
         switch (this.cryptoType) {
             case 0:
-                // return this.crypto.decrypt(bytes);
-                return bytes;
+                return this.crypto.decrypt(type, bytes);
             case 1:
                 return this.crypto.decrypt(type, bytes);
             default:
