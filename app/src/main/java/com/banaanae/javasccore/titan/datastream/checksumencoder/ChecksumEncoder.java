@@ -83,7 +83,7 @@ public class ChecksumEncoder {
     };
     
     public void writeFilteredStringReference(String stringValue) {
-        System.out.print("TODO: writeFilteredStringReference");
+        writeStringReference(stringValue);
     }
 
     public void writeBytes(byte[] buffer, int length) {

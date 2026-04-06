@@ -1,6 +1,7 @@
 package com.banaanae.javasccore.titan.datastream.bytestream;
 
 import com.banaanae.javasccore.titan.ArrayUtils;
+import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.titan.LogicLong;
 import com.banaanae.javasccore.titan.datastream.checksumencoder.ChecksumEncoder;
 import java.nio.charset.StandardCharsets;
@@ -84,14 +85,15 @@ public class ByteStream extends ChecksumEncoder {
 
         byte[] bytes = stringValue.getBytes(StandardCharsets.UTF_8);
         if (bytes.length > 900_000) {
-            System.out.println(String.format("ByteStream::writeString invalid string byte length %d", bytes.length));
+            Debugger.warning(String.format("ByteStream::writeString invalid string byte length %d", bytes.length));
+            writeInt(-1);
             return;
         } else if (bytes.length == 0) {
             writeInt(-1);
             return;
         }
 
-        writeInt((int) bytes.length);
+        writeInt(bytes.length);
         ensureCapacity(bytes.length);
         System.arraycopy(bytes, 0, buffer, offset, bytes.length);
         
@@ -185,13 +187,43 @@ public class ByteStream extends ChecksumEncoder {
     }
     
     public String readStringReference() {
-        System.out.println("TODO: readStringReference");
+        final int strLength = readInt();
+        int maxCapacity = 900000;
+
+        if (maxCapacity < 0)
+            Debugger.warning("Negative String reference length encountered.");
+
+        if (strLength > maxCapacity)
+            Debugger.warning("Too long String reference encountered, max", String.valueOf(maxCapacity));
+
+        if (length > 0 && strLength <= maxCapacity) {
+            final String string = new String(this.buffer, offset, strLength, StandardCharsets.UTF_8);
+            this.offset += strLength;
+            return string;
+        }
+
         return "";
     }
     
     @Override
     public void writeStringReference(String stringReferenceValue) {
-        System.out.println("TODO: writeStringReference");
+        super.writeStringReference(stringReferenceValue);
+        
+        if (stringReferenceValue == null) {
+            writeInt(0);
+            return;
+        }
+        
+        byte[] bytes = stringReferenceValue.getBytes(StandardCharsets.UTF_8);
+        if (bytes.length > 900000) {
+            Debugger.warning(String.format("Too long String reference encountered, max %d ", 900000));
+            writeInt(0);
+            return;
+        }
+        
+        writeInt(bytes.length);
+        ensureCapacity(bytes.length);
+        System.arraycopy(bytes, 0, buffer, offset, bytes.length);
     }
     
     public long readLongLong() {
