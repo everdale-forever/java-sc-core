@@ -37,7 +37,7 @@ public class ResourceManager {
         try {
             String baseDir = System.getProperty("user.dir").replaceAll("\\.titan$", "");
 
-            Path path = Paths.get(baseDir, "csv", file);
+            Path path = Paths.get(baseDir, "assets", file);
 
             byte[] bytes = Files.readAllBytes(path);
             return new String(bytes);

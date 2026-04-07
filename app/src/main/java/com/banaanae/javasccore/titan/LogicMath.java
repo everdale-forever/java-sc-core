@@ -90,6 +90,11 @@ public class LogicMath {
         0x1F, 0x1E, 0x1F
     };
     
+    /**
+     * Returns the sign for an int
+     * @param value Int to get sign of
+     * @return Int's sign
+     */
     public static int sign(int value) {
         if (value > 0)
             return 1;
@@ -97,26 +102,64 @@ public class LogicMath {
         return value >> 31;
     }
     
+    /**
+     * Find the bigger number from 2 integers
+     * @param first First number
+     * @param second Second number
+     * @return Larger number
+     */
     public static int max(int first, int second) {
         return Math.max(first, second);
     }
     
+    /**
+     * Find the bigger number from 2 longs
+     * @param first First number
+     * @param second Second number
+     * @return Larger number
+     */
     public static long max(long first, long second) {
         return Math.max(first, second);
     }
     
+    /**
+     * Find the smaller number from 2 integers
+     * @param first First number
+     * @param second Second number
+     * @return Smaller number
+     */
     public static int min(int first, int second) {
         return Math.min(first, second);
     }
     
+    /**
+     * Find the smaller number from 2 longs
+     * @param first First number
+     * @param second Second number
+     * @return Smaller number
+     */
     public static long min(long first, long second) {
         return Math.min(first, second);
     }
     
+    /**
+     * Make an integer be within an upper and lower bound
+     * @param value Number to clamp
+     * @param min Lower bound
+     * @param max Upper bound
+     * @return Clamped int
+     */
     public static int clamp(int value, int min, int max) {
         return Math.clamp(value, min, max);
     }
     
+    /**
+     * Make a long be within an upper and lower bound
+     * @param value Number to clamp
+     * @param min Lower bound
+     * @param max Upper bound
+     * @return Clamped int
+     */
     public static long clamp(long value, long min, long max) {
         return Math.clamp(value, min, max);
     }
@@ -129,20 +172,26 @@ public class LogicMath {
         return (int) Math.pow(value, exponent);
     }
     
-    public static int sqrtApproximate(int first, int second) {
-        first = Math.abs(first);
-        second = Math.abs(second);
+    /**
+     * Returns the approximate hypotenuse from 2 vector components
+     * @param a First component
+     * @param b Second component
+     * @return Approximated hypotenuse
+     */
+    public static int sqrtApproximate(int a, int b) {
+        a = LogicMath.abs(a);
+        b = LogicMath.abs(b);
         
-        boolean v2 = first < second;
-        int v3 = second;
-        if (first > second) {
-            second = first;
+        boolean v2 = a < b;
+        int v3 = b;
+        if (a > b) {
+            b = a;
         }
         if (v2) {
-            v3 = first;
+            v3 = a;
         }
         
-        return second + ((53 * v3) >> 7);
+        return b + ((53 * v3) >> 7);
     }
     
     public static int sqrt(int value) {
@@ -206,7 +255,16 @@ public class LogicMath {
         return result;
     }
     
-    public static LogicVector2 mulDivReduced(int first, int second, int multiplier, LogicVector2 output) {
+    /**
+     * Finds how many times the divisor can fit into first * second,
+     * creating a vector2 of multiples + remainder
+     * @param first First dividend factor
+     * @param second Second dividend factor
+     * @param divisor 
+     * @param output Vector2 to store results
+     * @return Vector2 of results, x is quotient, y is remainder, same object as output
+     */
+    public static LogicVector2 mulDivReduced(int first, int second, int divisor, LogicVector2 output) {
         if (first == 0 || second == 0)
             return output.set(0, 0);
         int v5, v6;
@@ -217,8 +275,8 @@ public class LogicMath {
             v5 = second;
             v6 = first;
         }
-        int v7 = multiplier / v5;
-        int v9 = multiplier % v5;
+        int v7 = divisor / v5;
+        int v9 = divisor % v5;
         if (v6 <= v7) {
             if (v6 != v7 || v9 != 0)
                 return output.set(0, v5 * v6);
@@ -227,15 +285,22 @@ public class LogicMath {
         int v10 = v6 / v7;
         int v11 = v6 % v7 * v5;
         final LogicVector2 temp = new LogicVector2();
-        mulDivReduced(v10, v9, multiplier, temp);
+        mulDivReduced(v10, v9, divisor, temp);
         int v12;
         if (v11 >= temp.y)
             v12 = 0;
         else
-            v12 = multiplier;
+            v12 = divisor;
         return output.set(v10 - temp.x - (v11 < temp.y ? 1 : 0), v11 + v12 - temp.y);
     }
     
+    /**
+     * Calculates the floor of (a1 * a2) / a3 without using 64-bit math
+     * @param a1 First dividend factor
+     * @param a2 Second dividend factor
+     * @param a3 Divisor
+     * @return The floor of (a1 * a2) / a3
+     */
     public static int mulDiv(int a1, int a2, int a3) {
         int v3 = 1;
         if (a1 < 0)
@@ -268,6 +333,11 @@ public class LogicMath {
         return (vector.x + v7) * v3;
     }
     
+    /**
+     * Normalize an angle to be within a range of -180 to 179 
+     * @param angle Angle to normalize
+     * @return Normalized angle
+     */
     public static int normalizeAngle180(int angle) {
         int result = angle % 360 + (angle % 360 < 0 ? 360 : 0);
         if (result > 179)
@@ -275,14 +345,33 @@ public class LogicMath {
         return result;
     }
     
+    /**
+     * Normalize an angle to be within the range of 0 to 360
+     * @param angle Angle to normalize
+     * @return Normalized angle
+     */
     public static int normalizeAngle360(int angle) {
         return angle % 360 + (angle % 360 < 0 ? 360 : 0);
     }
     
+    /**
+     * Get new x after rotating angle degrees
+     * @param x Initial x
+     * @param y Initial y
+     * @param angle Angle to rotate (counter-clockwise)
+     * @return New x
+     */
     public static int getRotatedX(int x, int y, int angle) {
         return (x * cos(angle) - y * sin(angle)) / 1024;
     }
     
+    /**
+     * Get new y after rotating angle degrees
+     * @param x Initial x
+     * @param y Initial y
+     * @param angle Angle to rotate (counter-clockwise)
+     * @return New y
+     */
     public static int getRotatedY(int x, int y, int angle) {
         return (x * sin(angle) + y * cos(angle)) / 1024;
     }
@@ -323,6 +412,12 @@ public class LogicMath {
         return cos(angle) * amplitude / 1024;
     }
     
+    /**
+     * Get angle from a line going through the origin and a supplied coordinate
+     * @param x x coordinate of point
+     * @param y y coordinate of point
+     * @return Angle from origin
+     */
     public static int getAngle(int x, int y) {
         if ((y | x) == 0)
             return 0;
@@ -358,6 +453,12 @@ public class LogicMath {
             return v5 + 360;
     }
     
+    /**
+     * Gets the angle between two angles
+     * @param angle1
+     * @param angle2
+     * @return Angle between
+     */
     public static int getAngleBetween(int angle1, int angle2) {
         int result = (angle1 - angle2) % 360 + ((angle1 - angle2) % 360 < 0 ? 360 : 0);
         if ( result > 179 )
@@ -367,16 +468,23 @@ public class LogicMath {
         return result;
     }
     
-    public static int getDistanceSquareToLine(LogicVector2 a1, LogicVector2 a2, LogicVector2 a3) {
-        int v3 = a1.x;
-        int v4 = a2.x;
-        int v5 = a1.y;
-        int v6 = a2.x - v3;
-        int v7 = a2.y;
+    /**
+     * Gets the shortest distance (squared) from a point to a line
+     * @param start Line start coordinate
+     * @param end Line end coordinate
+     * @param point Point to measure from
+     * @return Shortest distance (squared) from a point to a line
+     */
+    public static int getDistanceSquareToLine(LogicVector2 start, LogicVector2 end, LogicVector2 point) {
+        int v3 = start.x;
+        int v4 = end.x;
+        int v5 = start.y;
+        int v6 = end.x - v3;
+        int v7 = end.y;
         int v8 = v7 - v5;
-        int v9 = a3.x - v3;
+        int v9 = point.x - v3;
         int v10 = v6 * v6 + v8 * v8;
-        int v11 = a3.y;
+        int v11 = point.y;
         int v12 = v11 - v5;
         if (v10 == 0)
             return v9 * v9 + v12 * v12;
@@ -384,14 +492,21 @@ public class LogicMath {
         if (v13 <= 0)
             return v9 * v9 + v12 * v12;
         if (v13 >= v10)
-            return (a3.x - v4) * (a3.x - v4) + (v11 - v7) * (v11 - v7);
+            return (point.x - v4) * (point.x - v4) + (v11 - v7) * (v11 - v7);
         final LogicVector2 temp = new LogicVector2();
         mulDivReduced(v13, v13, v10, temp);
         return v9 * v9 + v12 * v12 - temp.x;
     }
     
-    public static int getDistanceToLine(LogicVector2 a1, LogicVector2 a2, LogicVector2 a3) {
-        return LogicMath.sqrt(getDistanceSquareToLine(a1, a2, a3));
+    /**
+     * Gets the shortest distance from a point to a line
+     * @param start Line start coordinate
+     * @param end Line end coordinate
+     * @param point Point to measure from
+     * @return Shortest distance from a point to a line
+     */
+    public static int getDistanceToLine(LogicVector2 start, LogicVector2 end, LogicVector2 point) {
+        return LogicMath.sqrt(getDistanceSquareToLine(start, end, point));
     }
     
     /**
