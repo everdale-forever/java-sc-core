@@ -5,7 +5,7 @@ import java.util.List;
 
 public class CSVColumn {
     private static final int BOOLEAN_VALUE_NOT_SET = 0x2;
-    private static final int INT_VALUE_NOT_SET = 0x7FFFFFFF;
+    private static final int INT_VALUE_NOT_SET = Integer.MAX_VALUE;
 
     private final List<Integer> booleanValues;
     private final List<Integer> integerValues;
