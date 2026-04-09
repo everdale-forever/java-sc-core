@@ -9,6 +9,11 @@ public class LogicJSONBoolean extends LogicJSONNode {
     }
     
     @Override
+    public void writeToString(StringBuilder sb) {
+        sb.append(value);
+    }
+    
+    @Override
     public int destruct() {
         return 0;
     }

@@ -9,14 +9,16 @@ public class LogicJSONObject extends LogicJSONNode {
     private LogicJSONNode[] keys;
     private int keyCapacity;
     private int keyCount;
-    private List names;
+    private List<String> names;
     private int nameCapacity;
     private int nameCount;
     
     public LogicJSONObject() {
         super();
+        this.names = new ArrayList<>();
         this.nameCount = 0;
-        this.keys = null;
+        this.keyCapacity = 0;
+        this.keys = new LogicJSONNode[0];
         this.keyCount = 0;
         this.keyCapacity = 0;
     }
@@ -44,14 +46,14 @@ public class LogicJSONObject extends LogicJSONNode {
             for (int i = 0; i < this.nameCount; i++) {
                 String existing = (String) this.names.get(i);
                 if (existing != null && existing.equals(name)) {
-                    Debugger.error("Duplicate key for value: " + value);
+                    Debugger.error("Duplicate key for value: " + name);
                     break;
                 }
             }
         } else {
             for (int i = this.keyCount - 1; i >= 0; i--) {
                 if (this.keys[i] == value) {
-                    Debugger.error("Duplicate key for value: " + value);
+                    Debugger.error("Duplicate key for value: " + name);
                     break;
                 }
             }
@@ -88,6 +90,22 @@ public class LogicJSONObject extends LogicJSONNode {
         this.nameCount++;
 
         return name;
+    }
+    
+    @Override
+    public void writeToString(StringBuilder sb) {
+        sb.append('{');
+        if (nameCount > 0) {
+            for (int i = 0; i != nameCount; ++i) {
+                String value = names.get(i);
+                if (i != 0)
+                    sb.append(',');
+                LogicJSONParser.writeString(value, sb);
+                sb.append(':');
+                keys[i].writeToString(sb);
+            }
+        }
+        sb.append('}');
     }
 
     

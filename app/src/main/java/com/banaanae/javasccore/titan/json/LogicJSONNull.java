@@ -4,6 +4,11 @@ public class LogicJSONNull extends LogicJSONNode {
     public LogicJSONNull() {}
     
     @Override
+    public void writeToString(StringBuilder sb) {
+        sb.append("null");
+    }
+    
+    @Override
     public int destruct() {
         return 0;
     }

@@ -5,4 +5,6 @@ public abstract class LogicJSONNode {
     
     public abstract int destruct();
     public abstract int getType();
+    
+    public abstract void writeToString(StringBuilder strBuilder);
 }

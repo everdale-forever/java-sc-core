@@ -7,6 +7,15 @@ public class LogicJSONString extends LogicJSONNode {
         this.value = value;
     }
     
+    public String getStringValue() {
+        return value;
+    }
+    
+    @Override
+    public void writeToString(StringBuilder sb) {
+        sb.append(value);
+    }
+    
     @Override
     public int destruct() {
         return 0;

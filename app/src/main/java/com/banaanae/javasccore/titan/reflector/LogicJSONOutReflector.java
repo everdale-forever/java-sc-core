@@ -9,15 +9,15 @@ import com.banaanae.javasccore.titan.reflectable.LogicReflectable;
 import com.banaanae.javasccore.titan.reflectable.LogicReflectableReferenceBase;
 
 public class LogicJSONOutReflector extends LogicReflector {
-    private LogicJSONNode[] stackNodes; // 8
-    private int stackCapacity;          // 16
-    private int stackSize;              // 20
-    private int[] values;               // 24
-    private int valuesCapacity;         // 32
-    private int valuesSize;             // 36
-    LogicJSONObject currentObject;      // 40
-    LogicJSONArray currentArray;        // 48
-    private int flags;                  // 64
+    private LogicJSONNode[] stackNodes;   // 8
+    private int stackCapacity;            // 16
+    private int stackSize;                // 20
+    private String[] values;              // 24
+    private int valuesCapacity;           // 32
+    private int valuesSize;               // 36
+    public LogicJSONObject currentObject; // 40
+    public LogicJSONArray currentArray;   // 48
+    private String unk;                   // 64
     
     public LogicJSONOutReflector(LogicJSONNode data) {
         final int type = data.getType();
@@ -108,7 +108,7 @@ public class LogicJSONOutReflector extends LogicReflector {
     }
     
     public String reflectString(String value, String objectName, String defaultVal) {
-        setString(value, objectName, defaultVal);
+        setString(objectName, value, defaultVal);
         return value;
     }
     
@@ -369,6 +369,7 @@ public class LogicJSONOutReflector extends LogicReflector {
             currentArray.add(obj);
         }
         pushStack();
+        currentObject = obj;
     }
     
     private void endObject() {
@@ -379,7 +380,7 @@ public class LogicJSONOutReflector extends LogicReflector {
         }
         this.stackSize--;
         this.stackCapacity--;
-        LogicJSONNode parent = stackNodes[8 * stackSize];
+        LogicJSONNode parent = this.stackNodes[stackSize];
         this.currentObject = null;
         int rootType = parent.getType();
         
@@ -415,11 +416,11 @@ public class LogicJSONOutReflector extends LogicReflector {
         if (stackSize <= 0 || valuesSize <= 0)
             Debugger.error("Mismatched begin/end or enter/exits in LogicJSONOutReflector");
         
-        valuesSize--;
-        stackSize--;
-        LogicJSONNode parent = stackNodes[8 * stackSize];
+        this.valuesSize--;
+        this.stackSize--;
+        LogicJSONNode parent = stackNodes[stackSize];
         currentObject = null;
-        this.flags = (int) values[4 * valuesSize];
+        this.unk = values[valuesSize];
         currentArray = null;
         
         final int type = parent.getType();
@@ -447,28 +448,28 @@ public class LogicJSONOutReflector extends LogicReflector {
                 if (stackNodes != null && stackSize > 0) {
                     System.arraycopy(stackNodes, 0, newArr, 0, stackSize);
                 }
-                stackNodes = newArr;
-                stackCapacity = newCap;
+                this.stackNodes = newArr;
+                this.stackCapacity = newCap;
             }
         }
 
-        stackNodes[stackSize++] = toPush;
+        stackNodes[this.stackSize++] = toPush;
 
         if (values == null || valuesSize == valuesCapacity) {
             int oldCap = valuesCapacity;
             int newCap = (oldCap != 0) ? oldCap * 2 : 5;
             if (oldCap < newCap) {
-                int[] newVals = new int[newCap];
+                String[] newVals = new String[newCap];
                 if (values != null && valuesSize > 0) {
                     System.arraycopy(values, 0, newVals, 0, valuesSize);
                 }
-                values = newVals;
-                valuesCapacity = newCap;
+                this.values = newVals;
+                this.valuesCapacity = newCap;
             }
         }
 
-        values[valuesSize++] = flags;
-        flags = 0;
+        values[this.valuesSize++] = unk;
+        unk = null;
 
         currentObject = null;
         currentArray = null;

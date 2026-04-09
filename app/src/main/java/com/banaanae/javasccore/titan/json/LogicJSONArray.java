@@ -170,6 +170,23 @@ public class LogicJSONArray extends LogicJSONNode {
         
         return (LogicJSONBoolean) obj;
     }
+    
+    @Override
+    public void writeToString(StringBuilder sb) {
+        sb.append('[');
+        if (size >= 1) {
+            items[0].writeToString(sb);
+            if (size - 1 >= 1) {
+                int i = 1;
+                do {
+                    sb.append(',');
+                    items[i].writeToString(sb);
+                    i++;
+                } while (i != size);
+            }
+        }
+        sb.append(']');
+    }
 
     @Override
     public int destruct() {
