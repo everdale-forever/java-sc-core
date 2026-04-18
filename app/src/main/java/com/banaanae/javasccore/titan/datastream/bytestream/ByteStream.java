@@ -23,10 +23,10 @@ public class ByteStream extends ChecksumEncoder {
     
     public int readInt() {
         this.bitOffset = 0;
-        return (this.buffer[this.offset++] << 24 | 
-                this.buffer[this.offset++] << 16 |
-                this.buffer[this.offset++] << 8 |
-                this.buffer[this.offset++]);
+        return ((this.buffer[this.offset++] & 0xFF) << 24 | 
+                (this.buffer[this.offset++] & 0xFF) << 16 |
+                (this.buffer[this.offset++] & 0xFF) << 8 |
+                (this.buffer[this.offset++] & 0xFF));
     }
     
     @Override
@@ -43,10 +43,10 @@ public class ByteStream extends ChecksumEncoder {
     
     public int readIntLE() {
         this.bitOffset = 0;
-        return (this.buffer[this.offset++] | 
-                this.buffer[this.offset++] << 8 |
-                this.buffer[this.offset++] << 16 |
-                this.buffer[this.offset++] << 24);
+        return ((this.buffer[this.offset++] & 0xFF) | 
+                (this.buffer[this.offset++] & 0xFF) << 8 |
+                (this.buffer[this.offset++] & 0xFF) << 16 |
+                (this.buffer[this.offset++] & 0xFF) << 24);
     }
     
     public void writeIntLE(int intValue) {
@@ -237,8 +237,8 @@ public class ByteStream extends ChecksumEncoder {
     public void writeLongLong(long longLongValue) {
         super.writeLongLong(longLongValue);
         
-        this.writeInt((int) longLongValue >> 32);
-        this.writeInt((int) longLongValue);
+        this.writeInt(LogicLong.getHigherInt(longLongValue));
+        this.writeInt(LogicLong.getLowerInt(longLongValue));
     }
     
     public LogicLong readLong() {
@@ -330,13 +330,129 @@ public class ByteStream extends ChecksumEncoder {
     }
     
     public long readVLong() {
-        System.out.println("TODO: readVLong");
-        return 0;
+        this.bitOffset = 0;
+
+        byte b = buffer[offset++];
+        boolean negative = (b & 0x40) != 0;
+        long result = b & 0x3F;
+
+        if ((b & 0x80) == 0) {
+            return negative ? result | 0xFFFFFFC0L : result;
+        }
+
+        result |= (buffer[offset++] & 0x7FL) << 6;
+        if ((buffer[offset - 1] & 0x80) == 0) {
+            return negative ? result | 0xFFFFE000L : result;
+        }
+
+        result |= (buffer[offset++] & 0x7FL) << 13;
+        if ((buffer[offset - 1] & 0x80) == 0) {
+            return negative ? result | 0xFFF00000L : result;
+        }
+
+        result |= (buffer[offset++] & 0x7FL) << 20;
+        if ((buffer[offset - 1] & 0x80) == 0) {
+            return negative ? result | 0xF8000000L : result;
+        }
+
+        result |= (buffer[offset++] & 0x7FL) << 27;
+        if ((buffer[offset - 1] & 0x80) == 0) {
+            return result;
+        }
+
+        // skip remaining bytes idk why
+        for (int i = 0; i < 4 && (buffer[offset] & 0x80) != 0; i++) {
+            offset++;
+        }
+        offset++; // termination byte
+
+        return result;
     }
     
     @Override
-    public void writeVLong(long vlongValue) {
-        System.out.println("TODO: writeVLong");
+    public void writeVLong(long value) {
+        this.bitOffset = 0;
+        ensureCapacity(10);
+
+        if (value >= 0) {
+            if (value <= 0x3F) {
+                buffer[offset++] = (byte) value;
+                return;
+            }
+            if (value <= 0x1FFF) {
+                buffer[offset++] = (byte) ((value & 0x3F) | 0x80);
+                buffer[offset++] = (byte)  (value >>> 6);
+                return;
+            }
+            if (value <= 0xFFFFF) {
+                buffer[offset++] = (byte) ((value & 0x3F) | 0x80);
+                buffer[offset++] = (byte) ((value >>> 6)  | 0x80);
+                buffer[offset++] = (byte)  (value >>> 13);
+                return;
+            }
+            if (value <= 0x7FFFFFFL) {
+                buffer[offset++] = (byte) ((value & 0x3F) | 0x80);
+                buffer[offset++] = (byte) ((value >>> 6)  | 0x80);
+                buffer[offset++] = (byte) ((value >>> 13) | 0x80);
+                buffer[offset++] = (byte)  (value >>> 20);
+                return;
+            }
+
+            int high32 = (int) (value >>> 32);
+            int numCont = 3;
+            if (high32 >= 0x40000000) numCont = 7;
+            else if (high32 >= 0x800000) numCont = 6;
+            else if (high32 >= 0x10000) numCont = 5;
+            else if (high32 >= 512) numCont = 4;
+
+            buffer[offset++] = (byte) ((value & 0x3F) | 0x80);
+            int shift = 6;
+            for (int i = 0; i < numCont; i++) {
+                buffer[offset++] = (byte) ((value >>> shift) | 0x80);
+                shift += 7;
+            }
+            buffer[offset++] = (byte) (value >>> shift);
+
+        } else {
+            if (value >= -63) {
+                buffer[offset++] = (byte) ((value & 0x3F) | 0x40);
+                return;
+            }
+            if (value > -8192) {
+                buffer[offset++] = (byte) (value | 0xC0);
+                buffer[offset++] = (byte) (value >>> 6);
+                return;
+            }
+            if (value > -1048576) {
+                buffer[offset++] = (byte)  (value | 0xC0);
+                buffer[offset++] = (byte) ((value >>> 6) | 0x80);
+                buffer[offset++] = (byte)  (value >>> 13);
+                return;
+            }
+            if (value > -134217728) {
+                buffer[offset++] = (byte) (value | 0xC0);
+                buffer[offset++] = (byte) ((value >>> 6) | 0x80);
+                buffer[offset++] = (byte) ((value >>> 13) | 0x80);
+                buffer[offset++] = (byte) (value >>> 20);
+                return;
+            }
+
+            int high32 = (int) (value >>> 32);
+            int adjusted = high32 + (value != 0 ? 1 : 0);
+            int numCont = 3;
+            if (adjusted < -1073741824) numCont = 7;
+            else if (adjusted < -8388608) numCont = 6;
+            else if (adjusted < -65536) numCont = 5;
+            else if (adjusted < -512) numCont = 4;
+
+            buffer[offset++] = (byte) (value | 0xC0);
+            int shift = 6;
+            for (int i = 0; i < numCont; i++) {
+                buffer[offset++] = (byte) ((value >>> shift) | 0x80);
+                shift += 7;
+            }
+            buffer[offset++] = (byte) (value >>> shift);
+        }
     }
     
     public String readFilteredString() {
@@ -345,7 +461,7 @@ public class ByteStream extends ChecksumEncoder {
     }
     
     public void writeFilteredString(String filteredStringValue) {
-        System.out.println("TODO: wrtirFilteredString");
+        System.out.println("TODO: writeFilteredString");
     }
     
     public String readFilteredStringReference() {
