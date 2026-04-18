@@ -282,7 +282,7 @@ public class LogicJSONOutReflector extends LogicReflector {
         return value;
     }
     
-    public LogicReflectable reflectNextReflectablePointer(LogicReflectable reflectable, String objectName, int reqType) {
+    public LogicReflectable reflectNextReflectablePointer(LogicReflectable reflectable, int reqType) {
         int id;
         if (reflectable != null) {
             id = reflectable.getReflectableId();
@@ -300,7 +300,7 @@ public class LogicJSONOutReflector extends LogicReflector {
         return reflectable;
     }
     
-    public void reflectNextReflectableReferenceBase(LogicReflectableReferenceBase value, String objectName, int reqType) {
+    public void reflectNextReflectableReferenceBase(LogicReflectableReferenceBase value, int reqType) {
         final int id = value.getId();
         
         if (currentArray == null)
@@ -323,7 +323,7 @@ public class LogicJSONOutReflector extends LogicReflector {
             } else if (id != reqType) {
                 Debugger.error("reflectNextReflectable - value type doesn't match required type");
             }
-            // LogicReflectable::getReflectableDataSchemaVersion
+            reflectable.reflect(this);
             endObject();
         } else {
             final LogicJSONNull obj = new LogicJSONNull();
@@ -349,7 +349,10 @@ public class LogicJSONOutReflector extends LogicReflector {
     
     public void fixReferences() {}
     
-    // reflectReflectableReferenceArrayInternal(int id, int64 a3 (unused), String objectName, int reqType)
+    public void reflectReflectableReferenceArrayInternal(int[] data, String objectName, int reqType) {
+        checkReflectableIdArrayRequiredType(data, reqType);
+        reflectIntArray(data, objectName);
+    }
     
     
     private void setString(String objectName, String value, String defaultVal) {

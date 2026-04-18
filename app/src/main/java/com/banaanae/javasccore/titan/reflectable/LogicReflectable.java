@@ -11,6 +11,8 @@ public class LogicReflectable {
         
         
     }
+    
+    public void reflect(LogicJSONOutReflector reflector) {}
 
     public int getReflectableId() {
         return 0;
