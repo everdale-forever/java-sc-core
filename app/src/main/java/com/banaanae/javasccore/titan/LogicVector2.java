@@ -168,10 +168,10 @@ public class LogicVector2 {
         return isInDistanceXY(vector.x, vector.y, radius);
     }
     
-    public boolean isInArea(int x1, int y1, int x2, int y2) {
-        if (this.x >= x1 && this.x < x1 + x2)
+    public boolean isInArea(int x1, int y1, int width, int height) {
+        if (this.x >= x1 && this.x < x1 + width)
             if (this.y >= y1)
-                return this.y < y1 + y2;
+                return this.y < y1 + height;
         return false;
     }
     
