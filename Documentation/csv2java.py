@@ -16,7 +16,7 @@ def to_camel_case(name):
 
 def to_pascal_case(name):
     """Converts filename like 'example' to 'Example'"""
-    return name.capitalize()
+    return "".join(part.capitalize() for part in name.split("_"))
 
 def get_base_type(csv_type):
     """Extracts base type, handling 'Number' -> 'int' and 'array' suffixes"""
@@ -141,11 +141,11 @@ public class {class_name} extends LogicData {{
     if 'string' in required_base_types:
         java_code += """
     public String getStringValue(String name) {
-        return (String) this.getValue(name, 0);
+        return this.getValue(name, 0);
     }
     
     public String getStringArrayValue(String name, int index) {
-        return (String) this.getValue(name, index);
+        return this.getValue(name, index);
     }
 """
     if 'int' in required_base_types:
