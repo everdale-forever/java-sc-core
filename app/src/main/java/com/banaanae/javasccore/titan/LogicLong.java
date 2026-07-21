@@ -11,8 +11,9 @@ public class LogicLong {
         this.low = low;
     }
     
-    public LogicLong(int high) {
-        this.high = high;
+    public LogicLong(long value) {
+        this.high = LogicLong.getHigherInt(value);
+        this.low = LogicLong.getLowerInt(value);
     }
         
     public LogicLong() {}
@@ -28,19 +29,16 @@ public class LogicLong {
     }
     
     public static LogicLong clone(LogicLong logicLongValue) {
-        final LogicLong clonedLogicLong = new LogicLong(
+        return new LogicLong(
                 logicLongValue.high,
                 logicLongValue.low
         );
-        
-        return clonedLogicLong;
     }
     
     @Override
     public boolean equals(Object logicLongValue) {
         if (this == logicLongValue) return true;
-        if (!(logicLongValue instanceof LogicLong)) return false;
-        LogicLong other = (LogicLong) logicLongValue;
+        if (!(logicLongValue instanceof LogicLong other)) return false;
         return this.high == other.high && this.low == other.low;
     }
     
@@ -57,7 +55,7 @@ public class LogicLong {
     }
     
     public static int getLowerInt(long longValue) {
-        return (int) (longValue < 0 ? longValue | 0x80000000 : longValue & 0x7FFFFFFF);
+        return (int) (longValue < 0 ? longValue | 0x80000000L : longValue & 0x7FFFFFFF);
     }
     
     public int getLowerInt(LogicLong logicLongValue) {
@@ -94,7 +92,7 @@ public class LogicLong {
     }
     
     public long toLong() {
-        return ((long) high << 32) | (low & 0xFFFFFFFFL);
+        return ((long) high << 32) | ((long) low & 0xFFFFFFFFL);
     }
     
     public String toString(int high, int low) {

@@ -1,5 +1,7 @@
 package com.banaanae.javasccore.titan.json;
 
+import com.banaanae.javasccore.titan.LogicLong;
+
 public class LogicJSONNumber extends LogicJSONNode {
     Object value;
     boolean isFloat = false;
@@ -18,6 +20,11 @@ public class LogicJSONNumber extends LogicJSONNode {
         super();
         this.value = value;
         this.isFloat = true;
+    }
+
+    public LogicJSONNumber(LogicLong value) {
+        super();
+        this.value = value.toLong();
     }
     
     @Override

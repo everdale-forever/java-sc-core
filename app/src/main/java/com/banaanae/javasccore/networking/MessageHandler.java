@@ -3,15 +3,16 @@ package com.banaanae.javasccore.networking;
 import com.banaanae.javasccore.Server.Client;
 import com.banaanae.javasccore.protocol.LogicMessageFactory;
 import com.banaanae.javasccore.protocol.PiranhaMessage;
+
 import java.lang.reflect.Constructor;
 
 public class MessageHandler {
     Client session;
-    
+
     public MessageHandler(Client session) {
         this.session = session;
     }
-    
+
     public void handle(int id, byte[] bytes) {
         Class<? extends PiranhaMessage> messageClass = LogicMessageFactory.createMessageByType(id);
         if (messageClass == null) {
@@ -30,7 +31,14 @@ public class MessageHandler {
             messageInstance.decode();
             messageInstance.execute();
         } catch (ReflectiveOperationException | RuntimeException e) {
-            this.session.error(e.toString());
+            StringBuilder sb = new StringBuilder();
+            sb.append(e).append('\n');
+
+            for (StackTraceElement element : e.getStackTrace()) {
+                sb.append("    at ").append(element).append('\n');
+            }
+
+            this.session.error(sb.toString());
         }
     }
 }

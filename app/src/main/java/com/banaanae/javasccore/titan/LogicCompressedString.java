@@ -3,25 +3,44 @@ package com.banaanae.javasccore.titan;
 import com.banaanae.javasccore.titan.datastream.bytestream.ByteStream;
 
 public class LogicCompressedString {
-    String string = "";
-    
-    public LogicCompressedString(String stringValue) {
-        this.string = stringValue;
+    byte[] compressed = {};
+    int strLen = -1;
+
+    public LogicCompressedString() {
     }
-    
-    public void encode(ByteStream stream) throws Exception {
-        final byte[] compressed = ZlibHelper.compress(string);
-        
+
+    public LogicCompressedString(String stringValue) {
+        this.strLen = stringValue.length();
+        this.compressed = ZlibHelper.compress(stringValue);
+    }
+
+    public LogicCompressedString(int strLen, byte[] compressed) {
+        this.strLen = strLen;
+        this.compressed = compressed;
+    }
+
+    public void clear() {
+        this.strLen = -1;
+        this.compressed = new byte[]{};
+    }
+
+    public void encode(ByteStream stream) {
         stream.writeInt(compressed.length + 4);
-        stream.writeIntLE(string.length());
+        stream.writeIntLE(strLen);
         stream.writeBytesWithoutLength(compressed);
     }
-    
-    public String decode(ByteStream stream) throws Exception {
-        //final int length = stream.readInt();
-        //final int stringLength = stream.readIntLE();
-        final byte[] compressed = stream.readBytes();
-        this.string = ZlibHelper.decompress(compressed);
-        return string;
+
+    public byte[] decode(ByteStream stream) {
+        this.compressed = stream.readBytes();
+        return this.compressed;
+    }
+
+    public byte[] decodeRef(ByteStream stream) {
+        this.compressed = stream.readBytes();
+        return this.compressed;
+    }
+
+    public String getString() {
+        return ZlibHelper.decompress(compressed);
     }
 }

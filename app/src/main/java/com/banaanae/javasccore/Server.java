@@ -5,6 +5,7 @@ import com.banaanae.javasccore.protocol.LogicMessageFactory;
 import com.banaanae.javasccore.networking.MessageHandler;
 import com.banaanae.javasccore.networking.Packet;
 import com.banaanae.javasccore.networking.Queue;
+import com.banaanae.javasccore.titan.ResourceManager;
 import com.banaanae.javasccore.titan.crypto.StreamEncrypter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -68,10 +69,10 @@ public class Server {
     }
     
     public void start(int port) throws IOException {
-        LogicMessageFactory.loadMessages();
+        ResourceManager.init();
         
         server = new ServerSocket(port);
-        System.out.println("Server started at " + server.getLocalSocketAddress());
+        System.out.println("[Server] Started at " + server.getLocalSocketAddress());
         
         while (!server.isClosed()) {
             Socket session = server.accept();

@@ -8,7 +8,7 @@ public class CSVRow {
     
     public CSVRow(CSVTable table) {
         this.table = table;
-        this.rowOffset = table.getColumnCount();
+        this.rowOffset = table.getRowCount();
     }
     
     public int getArraySize(String columnName) {
@@ -58,7 +58,7 @@ public class CSVRow {
                 index = LogicMath.max(arraySize - 1, 0);
             }
 
-            return this.table.getBooleanValueAt(columnIndex, this.rowOffset + this.rowOffset + index);
+            return this.table.getBooleanValueAt(columnIndex, this.rowOffset + index);
         }
 
         return false;
@@ -88,15 +88,15 @@ public class CSVRow {
         return 0;
     }
 
-    public Object getValue(String columnName, int index) {
+    public String getValue(String columnName, int index) {
         return this.table.getValue(columnName, this.rowOffset + index);
     }
 
-    public Object getValueAt(int columnIndex, int index) {
+    public String getValueAt(int columnIndex, int index) {
         return this.table.getValueAt(columnIndex, this.rowOffset + index);
     }
 
-    public Object getClampedValueAt(String columnName, int index) {
+    public String getClampedValueAt(String columnName, int index) {
         final int columnIndex = this.getColumnIndexByName(columnName);
 
         if (columnIndex != -1) {
@@ -113,7 +113,7 @@ public class CSVRow {
     }
 
     public String getName() {
-        return (String) this.table.getValueAt(0, this.rowOffset);
+        return this.table.getValueAt(0, this.rowOffset);
     }
 
     public int getRowOffset() {

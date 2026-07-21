@@ -3,31 +3,30 @@ package com.banaanae.javasccore.logic.data;
 import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.titan.csv.CSVNode;
 import com.banaanae.javasccore.titan.csv.CSVTable;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LogicDataTables {
-    public static final int TABLE_COUNT = 0;
-    
-    private static final List<LogicDataTable> tables = new ArrayList<>();
-    
+    private static final Map<Integer, LogicDataTable> tables = new HashMap<>();
+
     public static void initDataTables(CSVNode node, int index) {
-        if (index <= TABLE_COUNT) {
-            final CSVTable table = node.getTable();
-            
-            if (table == null)
-                Debugger.error("Unable to find table from", node.getFileName());
-            
-            if (LogicDataTables.tables.get(index) != null) {
-                LogicDataTables.tables.get(index).setTable(table);
-            } else {
-                // TODO: globals
-                
-                LogicDataTables.tables.set(index, new LogicDataTable(table, index));
-            }
+        final CSVTable table = node.getTable();
+
+        if (table == null)
+            Debugger.error("Unable to find table from", node.getFileName());
+
+        if (LogicDataTables.tables.containsKey(index)) {
+            LogicDataTables.tables.get(index).setTable(table);
+        } else {
+            // TODO: globals
+
+            LogicDataTables.tables.put(index, new LogicDataTable(table, index));
         }
     }
-    
+
     public static void createReferences() {
         for (int i = 0; i < tables.size(); i++) {
             if (LogicDataTables.tables.get(i) != null)
@@ -45,5 +44,9 @@ public class LogicDataTables {
             return LogicDataTables.tables.get(tableId).getDataByName(name);
 
         return null;
+    }
+
+    public static LogicDataTable getTable(int tableIdx) {
+        return tables.get(tableIdx);
     }
 }

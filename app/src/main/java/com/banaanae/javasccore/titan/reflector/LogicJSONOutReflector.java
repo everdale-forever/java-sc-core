@@ -1,5 +1,6 @@
 package com.banaanae.javasccore.titan.reflector;
 
+import com.banaanae.javasccore.logic.data.LogicData;
 import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.titan.LogicCompressedString;
 import com.banaanae.javasccore.titan.LogicLong;
@@ -7,6 +8,9 @@ import com.banaanae.javasccore.titan.json.*;
 import com.banaanae.javasccore.titan.random.LogicRandom;
 import com.banaanae.javasccore.titan.reflectable.LogicReflectable;
 import com.banaanae.javasccore.titan.reflectable.LogicReflectableReferenceBase;
+import com.google.common.primitives.Ints;
+
+import java.util.ArrayList;
 
 public class LogicJSONOutReflector extends LogicReflector {
     private LogicJSONNode[] stackNodes;   // 8
@@ -53,10 +57,10 @@ public class LogicJSONOutReflector extends LogicReflector {
         return true;
     }
     
-    public boolean reflectObjectOptional(String objectName, boolean a3) {
-        if (a3) // TODO
+    public boolean reflectObjectOptional(String objectName, boolean hasObj) {
+        if (hasObj)
             beginObject(objectName);
-        return a3;
+        return hasObj;
     }
     
     public void reflectExitObject() {
@@ -95,7 +99,7 @@ public class LogicJSONOutReflector extends LogicReflector {
         }
         return value;
     }
-    
+
     public float reflectFloat(float value, String objectName, float defaultVal) {
         if (currentObject == null) {
             Debugger.error("LogicJSONOutReflector: no object exists");
@@ -125,12 +129,19 @@ public class LogicJSONOutReflector extends LogicReflector {
         return value;
     }
     
-    public void reflectCompressedString(LogicCompressedString value, String objectName) {
+    public byte[] reflectCompressedString(LogicCompressedString value, String objectName) {
         System.out.println("TODO: reflectCompressedString");
+        return new byte[0];
     }
-    
-    // reflectStringBuilder
-    // reflectJSONPtr
+
+    public void reflectStringBuilder(StringBuilder value, String objectName) {
+        System.out.println("TODO: reflectStringBuilder");
+    }
+
+    public LogicJSONNode reflectJSONPtr(LogicJSONNode value, String objectName) {
+        System.out.println("TODO: reflectJSONPtr");
+        return new LogicJSONObject();
+    }
     
     public void reflectRandom(LogicRandom value, String objectName) {
         final int seed = value.getIteratedSeed();
@@ -145,62 +156,97 @@ public class LogicJSONOutReflector extends LogicReflector {
         currentObject.put(objectName, obj);
     }
     
-    public void reflectIntArray(int[] arr, String objectName) {
-        final int length = arr.length;
+    public ArrayList<Integer> reflectIntArray(ArrayList<Integer> arr, String objectName) {
+        final int length = arr.size();
         
         if (length >= 1) {
             beginArray(objectName, length);
             for (int i = 0; i != length; ++i) {
-                final LogicJSONNumber obj = new LogicJSONNumber(arr[i]);
+                final LogicJSONNumber obj = new LogicJSONNumber(arr.get(i));
                 currentArray.add(obj);
             }
             endArray();
         }
+
+        return arr;
     }
     
-    public void reflectLongArray(long[] arr, String objectName) {
-        final int length = arr.length;
+    public ArrayList<Long> reflectLongArray(ArrayList<Long> arr, String objectName) {
+        final int length = arr.size();
         
         if (length >= 1) {
             beginArray(objectName, length);
             for (int i = 0; i != length; ++i) {
-                final LogicJSONNumber obj = new LogicJSONNumber(arr[i]);
+                final LogicJSONNumber obj = new LogicJSONNumber(arr.get(i));
                 currentArray.add(obj);
             }
             endArray();
         }
-    }
-    
-    public void reflectLongArray(LogicLong[] arr, String objectName) {
-        final int length = arr.length;
-        
-        if (length >= 1) {
-            beginArray(objectName, length);
-            for (int i = 0; i != length; ++i) {
-                final LogicJSONNumber obj = new LogicJSONNumber(arr[i].toLong());
-                currentArray.add(obj);
-            }
-            endArray();
-        }
+
+        return arr;
     }
 
-    // reflectSimpleByteArray
-    // reflectSimpleIntArray
-    // reflectSimpleLongArray
+    public ArrayList<LogicLong> reflectLogicLongArray(ArrayList<LogicLong> arr, String objectName) {
+        final int length = arr.size();
+
+        if (length >= 1) {
+            beginArray(objectName, length);
+            for (int i = 0; i != length; ++i) {
+                final LogicJSONNumber obj = new LogicJSONNumber(arr.get(i));
+                currentArray.add(obj);
+            }
+            endArray();
+        }
+
+        return arr;
+    }
+
+    public byte[] reflectSimpleByteArray(byte[] values, int length, String objectName) {
+        beginArray(objectName, length);
+
+        for (int i = 0; i < length; i++) {
+            final LogicJSONNumber obj = new LogicJSONNumber(values[i]);
+            currentObject.put(objectName, obj);
+        }
+
+        return values;
+    }
+
+    public int[] reflectSimpleIntArray(int[] values, int length, String objectName) {
+        beginArray(objectName, length);
+
+        for (int i = 0; i < length; i++) {
+            final LogicJSONNumber obj = new LogicJSONNumber(values[i]);
+            currentObject.put(objectName, obj);
+        }
+
+        return values;
+    }
+
+    public long[] reflectSimpleLongArray(long[] values, int length, String objectName) {
+        beginArray(objectName, length);
+
+        for (int i = 0; i < length; i++) {
+            final LogicJSONNumber obj = new LogicJSONNumber(values[i]);
+            currentObject.put(objectName, obj);
+        }
+
+        return values;
+    }
     
-    public LogicReflectable reflectReflectablePointerBase(LogicReflectable reflectable, String objectName) {
-        if (reflectable != null) {
-            final int reflectableId = reflectable.getReflectableId();
-            if (reflectableId == 0)
+    public LogicReflectable reflectReflectablePointerBase(LogicReflectable data, String objectName, int reqType) {
+        if (data != null) {
+            final int dataId = data.getReflectableId();
+            if (dataId == 0)
                 Debugger.error("LogicJSONOutReflector::reflectReflectablePointerBase() - reflectable id is zero, is missing from a reflectable id map?");
             
             if (currentObject == null)
                 Debugger.error("LogicJSONOutReflector: no object exists");
             
-            final LogicJSONNumber obj = new LogicJSONNumber(reflectableId);
+            final LogicJSONNumber obj = new LogicJSONNumber(dataId);
             currentObject.put(objectName, obj);
         }
-        return reflectable;
+        return data;
     }
     
     public int reflectArray(int length, String objectName) {
@@ -223,8 +269,8 @@ public class LogicJSONOutReflector extends LogicReflector {
         return true;
     }
     
-    public boolean reflectNextObjectOptional(boolean a2) {
-        if (a2) {
+    public boolean reflectNextObjectOptional(boolean hasObj) {
+        if (hasObj) {
             if (currentArray == null)
                 Debugger.error("LogicJSONOutReflector: no current array exists"); 
             
@@ -234,7 +280,7 @@ public class LogicJSONOutReflector extends LogicReflector {
             currentArray.add(obj);
         }
 
-        return a2;        
+        return hasObj;
     }
     
     public int reflectNextInt(int value) {
@@ -333,6 +379,9 @@ public class LogicJSONOutReflector extends LogicReflector {
     }
     
     public void reflectReflectableReferenceBase(LogicReflectableReferenceBase value, String objectName, int reqType) {
+        if (value == null)
+            return;
+
         final int id = value.getId();
         checkReflectableIdRequiredType(id, reqType);
         
@@ -349,7 +398,7 @@ public class LogicJSONOutReflector extends LogicReflector {
     
     public void fixReferences() {}
     
-    public void reflectReflectableReferenceArrayInternal(int[] data, String objectName, int reqType) {
+    public void reflectReflectableReferenceArrayInternal(ArrayList<Integer> data, ArrayList<LogicReflectable> reflectables, String objectName, int reqType) {
         checkReflectableIdArrayRequiredType(data, reqType);
         reflectIntArray(data, objectName);
     }

@@ -54,249 +54,177 @@ public class BitStream {
         this.offset = 0;
         this.bitOffset = 0;
     }
-    
-    public int readBits(int count) {
-        if (count < 1)
-            return 0;
-        
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != count; ++i) {
-            byte currByte = stream[offset];
-            this.bitOffset = oldBitOffset + 1;
-            
-            result |= ((currByte & (1 << oldBitOffset)) >> oldBitOffset) << i;
-            
-            if (bitOffset == 7) {
-                this.offset++;
-                this.bitOffset = 0;
-            } else {
-                oldBitOffset++;
-            }
-        }
-        
-        return result;
-    }
-    
-    public boolean readBoolean() {
-        byte currByte = stream[offset];
-        int bit = (currByte & (1 << bitOffset)) >> bitOffset;
-        
-        if (bitOffset == 7) {
-            this.offset++;
-            this.bitOffset = 0;
-        }
-        
-        return bit == 1;
-    }
-    
+
     public int readOneBit() {
         byte currByte = stream[offset];
         int bit = (currByte & (1 << bitOffset)) >> bitOffset;
-        
+
         if (bitOffset == 7) {
             this.offset++;
             this.bitOffset = 0;
         } else {
             this.bitOffset++;
         }
-        
+
         return bit;
+    }
+
+    public int readBits(int count) {
+        if (count <= 0) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (int i = 0; i < count; i++) {
+            result |= readOneBit() << i;
+        }
+
+        return result;
+    }
+    
+    public boolean readBoolean() {
+        return readOneBit() == 1;
     }
     
     public int readIntMax1() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(1);
 
-        int magnitude = readOneBit();
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax3() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(2);
 
-        int magnitude = 0;
-        for (int i = 0; i < 2; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax7() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(3);
 
-        int magnitude = 0;
-        for (int i = 0; i < 3; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax15() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(4);
 
-        int magnitude = 0;
-        for (int i = 0; i < 4; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax31() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(5);
 
-        int magnitude = 0;
-        for (int i = 0; i < 5; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax63() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(6);
 
-        int magnitude = 0;
-        for (int i = 0; i < 6; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax127() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(7);
 
-        int magnitude = 0;
-        for (int i = 0; i < 7; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax255() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(8);
 
-        int magnitude = 0;
-        for (int i = 0; i < 8; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax511() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(9);
 
-        int magnitude = 0;
-        for (int i = 0; i < 9; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax1023() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(10);
 
-        int magnitude = 0;
-        for (int i = 0; i < 10; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax2047() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(11);
 
-        int magnitude = 0;
-        for (int i = 0; i < 11; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax4095() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(12);
 
-        int magnitude = 0;
-        for (int i = 0; i < 12; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax8191() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(13);
 
-        int magnitude = 0;
-        for (int i = 0; i < 13; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax16383() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(14);
 
-        int magnitude = 0;
-        for (int i = 0; i < 14; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax32767() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(15);
 
-        int magnitude = 0;
-        for (int i = 0; i < 15; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
     
     public int readIntMax65535() {
-        int sign = readOneBit();
+        int sign = readOneBit() * -1;
+        int magnitude = readBits(16);
 
-        int magnitude = 0;
-        for (int i = 0; i < 16; i++)
-            magnitude |= (readOneBit() << i);
-
-        return magnitude * (2 * sign - 1);
+        return sign * magnitude;
     }
-    
-    // Doesn't seem to resize, nor does it have any xrefs...
-    public void writeBits(int value, int bitCount) {
-        if (offset == 0 && bitOffset == 0)
+
+    public void writeOneBit(int value) {
+        if (offset == 0 && bitOffset == 0) {
             stream[0] = 0;
+        }
 
-        for (int i = 0; i < bitCount; i++) {
-            int bit = (value >> i) & 1;
-            stream[offset] |= (bit << bitOffset);
+        stream[offset] |= (byte) (value << bitOffset);
 
-            bitOffset++;
+        bitOffset++;
+        if (bitOffset == 8) {
+            bitOffset = 0;
+            offset++;
 
-            if (bitOffset == 8) {
-                bitOffset = 0;
-                offset++;
-
-                if (offset < stream.length) {
-                    stream[offset] = 0;
-                }
+            if (offset < stream.length) {
+                stream[offset] = 0;
             }
+        }
+    }
+
+    public void writeBits(int value, int count) {
+        for (int i = 0; i < count; i++) {
+            writeOneBit((value >> i) & 1);
         }
     }
     
     public void writeBoolean(boolean value) {
         writePositiveInt(value ? 1 : 0, 1);
-    }
-    
-    public void writeOneBit(int value) {
-        stream[offset] |= value << bitOffset;
-        
-        this.bitOffset++;
-        if (bitOffset == 8) {
-            this.offset++;
-            this.bitOffset = 0;
-        }
     }
     
     public void writeIntMax1(int value) {
@@ -322,6 +250,7 @@ public class BitStream {
     public void writeIntMax63(int value) {
         writeInt(value, 6);
     }
+
     public void writeIntMax127(int value) {
         writeInt(value, 7);
     }
@@ -361,588 +290,140 @@ public class BitStream {
     public void writeIntMax65535(int value) {
         writeInt(value, 16);
     }
-    
+
     public void writeInt(int value, int bitsCount) {
-        if (value != LogicMath.clamp(value, (-1 << bitsCount) + 1, ~(-1 << bitsCount)))
+        if (value != LogicMath.clamp(value,
+                (-1 << bitsCount) + 1,
+                ~(-1 << bitsCount))) {
             Debugger.error(String.format(
-                    "Write to BitStream out of range! (integer: %d, bits: %d)"
-                    , value, bitsCount));
-        
-        if (offset + 6 > capacity) {
-            int newCap = capacity + 105;
-            byte[] newStream = new byte[newCap];
-
-            System.arraycopy(this.stream, 0, newStream, 0, offset + 1);
-
-            this.stream = newStream;
-            this.capacity = newCap;
+                    "Write to BitStream out of range! (integer: %d, bits: %d)",
+                    value, bitsCount));
         }
-        
+
+        ensureCapacity();
+
         writeOneBit(value >= 0 ? 1 : 0);
-        this.bitOffset++;
-        if (bitOffset == 8) {
-            this.offset++;
-            this.bitOffset = 0;
-            stream[offset] = 0;
-        }
-
-        if (bitsCount >= 1) {
-            int bitIdx = 0;
-
-            do {
-                stream[offset] |= (LogicMath.abs(value) & (1 << bitIdx)) >> bitIdx << bitOffset;
-                bitOffset++;
-                if (bitOffset == 8) {
-                    this.offset++;
-                    this.bitOffset = 0;
-                    stream[offset] = 0;
-                }
-                bitIdx++;
-            } while (bitIdx != bitsCount);
-        }
+        writeBits(LogicMath.abs(value), bitsCount);
     }
     
     public int readPositiveIntMax1() {
-        int currByte = stream[offset];
-        bitOffset++;
-        if (bitOffset == 8) {
-            bitOffset = 0;
-            offset++;
-        }
-        return (currByte & (1 << bitOffset)) >> bitOffset;
+        return readBits(1);
     }
     
     public int readPositiveIntMax3() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 2; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(2);
     }
     
     public int readPositiveIntMax7() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 3; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(3);
     }
     
     public int readPositiveIntMax15() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 4; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(4);
     }
     
     public int readPositiveIntMax31() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 5; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(5);
     }
     
     public int readPositiveIntMax63() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 6; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(6);
     }
     
     public int readPositiveIntMax127() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 7; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(7);
     }
     
     public int readPositiveIntMax255() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 8; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(8);
     }
     
     public int readPositiveIntMax511() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 9; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(9);
     }
     
     public int readPositiveIntMax1023() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 10; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(10);
     }
     
     public int readPositiveIntMax2047() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 11; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(11);
     }
     
     public int readPositiveIntMax4095() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 12; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(12);
     }
     
     public int readPositiveIntMax8191() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 13; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(13);
     }
     
     public int readPositiveIntMax16383() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 14; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(14);
     }
     
     public int readPositiveIntMax32767() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 15; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(15);
     }
     
     public int readPositiveIntMax65535() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 16; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(16);
     }
     
     public int readPositiveIntMax131071() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 17; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(17);
     }
     
     public int readPositiveIntMax262143() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 18; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(18);
     }
     
     public int readPositiveIntMax524287() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 19; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(19);
     }
     
     public int readPositiveIntMax1048575() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 20; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(20);
     }
     
     public int readPositiveIntMax2097151() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 21; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(21);
     }
     
     public int readPositiveIntMax4194303() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 22; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(22);
+    }
+
+    public int readPositiveIntMax8388608() {
+        return readBits(23);
     }
     
-    // no 8388608? TODO: Check later than 36
-    
     public int readPositiveIntMax16777215() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 2; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(24);
     }
     
     public int readPositiveIntMax33554431() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 25; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(25);
     }
     
     public int readPositiveIntMax67108863() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 26; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(26);
     }
     
     public int readPositiveIntMax134217727() {
-        int result = 0;
-        int oldBitOffset = bitOffset;
-        
-        for (int i = 0; i != 27; ++i) {
-            int currByte = stream[offset];
-            bitOffset = oldBitOffset + 1;
-            int v7 = (currByte & (1 << oldBitOffset)) >> oldBitOffset;
-            if (oldBitOffset == 7) {
-                offset++;
-                bitOffset = 0;
-                oldBitOffset = 0;
-            } else {
-                ++oldBitOffset;
-            }
-            result |= v7 << i;
-        }
-        return result;
+        return readBits(27);
     }
-    
-    public void writePositiveInt(int value, int bitsCount) {
-        if (value != LogicMath.clamp(value, 0, ~(-1 << bitsCount)))
+
+    public void writePositiveInt(int value, int count) {
+        if (value != LogicMath.clamp(value, 0, ~(-1 << count))) {
             Debugger.error(String.format(
-                    "Write to BitStream out of range! (integer: %d, bits: %d)"
-                    , value, bitsCount));
-        
-        if (offset + 6 > capacity) {
-            int newCap = capacity + 105;
-            byte[] newStream = new byte[newCap];
-
-            System.arraycopy(this.stream, 0, newStream, 0, offset + 1);
-
-            this.stream = newStream;
-            this.capacity = newCap;
+                    "Write to BitStream out of range! (integer: %d, bits: %d)",
+                    value, count));
         }
-        
-        if (bitsCount >= 1) {
-            int bitsIdx = 0;
-            
-            do {
-                stream[offset] |= (value & (1 << bitsIdx)) >> bitsIdx << bitOffset;
-                this.bitOffset++;
-                if (bitOffset == 8) {
-                    this.offset++;
-                    this.bitOffset = 0;
-                }
-                bitsIdx++;
-            } while (bitsIdx != bitsCount);
-        }
+
+        ensureCapacity();
+
+        writeBits(value, count);
     }
     
     public void writePositiveIntMax1(int value) {
@@ -1052,100 +533,105 @@ public class BitStream {
     public void writePositiveIntMax134217727(int value) {
         writePositiveInt(value, 27);
     }
-    
-    /* TODO
-    public int readPositiveVIntMax255() {}
-    public int readPositiveVIntMax255OftenZero() {}
-    public int readPositiveVIntMax65535() {}
-    public int readPositiveVIntMax65535OftenZero() {}
-    public long readPositiveVIntMax4294967295() {return 0;}
-    public long readPositiveVIntMax4294967295OftenZero() {return 0;}*/
-    
-    public void writePositiveVInt(int value, int bitsCount) {
-        if (value != LogicMath.clamp(value, 0, ~(-1 << (1 << bitsCount))))
+
+    public int readPositiveVIntMax255() {
+        int count = readBits(3) + 1;
+        return readBits(count);
+    }
+
+    public int readPositiveVIntMax255OftenZero() {
+        if (readOneBit() == 1)
+            return 0;
+
+        int count = readBits(3) + 1;
+        return readBits(count);
+    }
+
+    public int readPositiveVIntMax65535() {
+        int count = readBits(4) + 1;
+        return readBits(count);
+    }
+
+    public int readPositiveVIntMax65535OftenZero() {
+        if (readOneBit() == 1)
+            return 0;
+
+        int count = readBits(4) + 1;
+        return readBits(count);
+    }
+
+    public int readPositiveVIntMax2147483647() {
+        int count = readBits(5) + 1;
+        return readBits(count);
+    }
+
+    public int readPositiveVIntMax2147483647OftenZero() {
+        if (readOneBit() == 1)
+            return 0;
+
+        int count = readBits(5) + 1;
+        return readBits(count);
+    }
+
+    public void writePositiveVInt(int value, int count) {
+        if (value != LogicMath.clamp(value, 0, ~(-1 << (1 << count)))) {
             Debugger.error(String.format(
-                    "Write to BitStream out of range! (integer: %d, bits: %d)"
-                    , value, bitsCount));
-        
-        if (offset + 6 > capacity) {
-            int newCap = capacity + 105;
-            byte[] newStream = new byte[newCap];
-
-            System.arraycopy(this.stream, 0, newStream, 0, offset + 1);
-
-            this.stream = newStream;
-            this.capacity = newCap;
+                    "Write to BitStream out of range! (integer: %d, bits: %d)",
+                    value, count));
         }
-        
-        int v13;
-        int v14;
-        if (value != 0) {
-            if (value < 1) {
-                v14 = 0;
-            } else {
-                v13 = value;
-                v14 = 0;
-                do {
-                    v14++;
-                    v13 >>= 1;
-                } while (v13 != 0);
-            }
+
+        ensureCapacity();
+
+        int numBits;
+        if (value == 0) {
+            numBits = 1;
         } else {
-            v14 = 1;
+            numBits = 32 - Integer.numberOfLeadingZeros(value);
         }
-        
-        if (bitsCount >= 1) {
-            int bitIdx = 0;
-            do {
-                stream[offset] |= ((v14 - 1) & (1 << bitIdx)) >> bitIdx << bitOffset;
-                this.bitOffset++;
-                if (bitOffset == 8) {
-                    this.offset++;
-                    this.bitOffset = 0;
-                }
-                bitIdx++;
-            } while (bitIdx != bitOffset);
-        }
-        
-        if (v14 != 0) {
-            for (int i = 0; i != v14; ++i) {
-                stream[offset] |= ((value & (1 << i)) >> i) << bitOffset;
-                this.bitOffset++;
-                if (bitOffset == 8) {
-                    this.offset++;
-                    this.bitOffset = 0;
-                }
-            }
-        }
+
+        writeBits(numBits - 1, count);
+        writeBits(value, numBits);
     }
     
     public void writePositiveVIntMax255(int value) {
-        writePositiveInt(value, 3);
+        writePositiveVInt(value, 3);
     }
     
     public void writePositiveVIntMax255OftenZero(int value) {
-        writePositiveInt(0, 1);
-        
-        if (value == 0)
+        if (value == 0) {
+            writePositiveInt(1, 1);
             return;
-        
+        }
+
+        writePositiveInt(0, 1);
         writePositiveVInt(value, 3);
     }
     
     public void writePositiveVIntMax65535(int value) {
-        writePositiveInt(value, 4);
-    }
-    
-    public void writePositiveVIntMax65535OftenZero(int value) {
-        writePositiveInt(0, 1);
-        
-        if (value == 0)
-            return;
-        
         writePositiveVInt(value, 4);
     }
     
-    // TODO
-    public void writePositiveVIntMax4294967295(long value) {} // 5
-    public void writePositiveVIntMax4294967295OftenZero(long value) {}
+    public void writePositiveVIntMax65535OftenZero(int value) {
+        if (value == 0) {
+            writePositiveInt(1, 1);
+            return;
+        }
+
+        writePositiveInt(0, 1);
+        writePositiveVInt(value, 4);
+    }
+
+    public void writePositiveVIntMax2147483647(int value) {
+        writePositiveVInt(value, 5);
+    }
+
+    public void writePositiveVIntMax2147483647OftenZero(int value) {
+        if (value == 0) {
+            writePositiveInt(1, 1);
+            return;
+        }
+
+        writePositiveInt(0, 1);
+        writePositiveVInt(value, 5);
+    }
 }

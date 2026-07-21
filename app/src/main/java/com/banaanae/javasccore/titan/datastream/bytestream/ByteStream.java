@@ -4,6 +4,7 @@ import com.banaanae.javasccore.titan.ArrayUtils;
 import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.titan.LogicLong;
 import com.banaanae.javasccore.titan.datastream.checksumencoder.ChecksumEncoder;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -12,7 +13,7 @@ public class ByteStream extends ChecksumEncoder {
     public int length = 0;
     int offset = 0;
     int bitOffset = 0;
-    
+
     public ByteStream(byte[] bytes) {
         super();
         this.buffer = bytes;
@@ -20,70 +21,69 @@ public class ByteStream extends ChecksumEncoder {
         this.offset = 0;
         this.bitOffset = 0;
     }
-    
+
     public int readInt() {
         this.bitOffset = 0;
-        return ((this.buffer[this.offset++] & 0xFF) << 24 | 
+        return ((this.buffer[this.offset++] & 0xFF) << 24 |
                 (this.buffer[this.offset++] & 0xFF) << 16 |
                 (this.buffer[this.offset++] & 0xFF) << 8 |
                 (this.buffer[this.offset++] & 0xFF));
     }
-    
+
     @Override
-    public void writeInt(int intValue) {
-        super.writeInt(intValue);
-        
+    public void writeInt(int value) {
+        super.writeInt(value);
+
         this.bitOffset = 0;
         this.ensureCapacity(4);
-        this.buffer[this.offset++] = (byte) (intValue >>> 24);
-        this.buffer[this.offset++] = (byte) (intValue >>> 16);
-        this.buffer[this.offset++] = (byte) (intValue >>> 8);
-        this.buffer[this.offset++] = (byte) (intValue);
+        this.buffer[this.offset++] = (byte) (value >>> 24);
+        this.buffer[this.offset++] = (byte) (value >>> 16);
+        this.buffer[this.offset++] = (byte) (value >>> 8);
+        this.buffer[this.offset++] = (byte) (value);
     }
-    
+
     public int readIntLE() {
         this.bitOffset = 0;
-        return ((this.buffer[this.offset++] & 0xFF) | 
-                (this.buffer[this.offset++] & 0xFF) << 8 |
-                (this.buffer[this.offset++] & 0xFF) << 16 |
-                (this.buffer[this.offset++] & 0xFF) << 24);
+        return (this.buffer[this.offset++] |
+                this.buffer[this.offset++] << 8 |
+                this.buffer[this.offset++] << 16 |
+                this.buffer[this.offset++] << 24);
     }
-    
-    public void writeIntLE(int intValue) {
+
+    public void writeIntLE(int value) {
         this.bitOffset = 0;
         this.ensureCapacity(4);
-        this.buffer[this.offset++] = (byte) (intValue);
-        this.buffer[this.offset++] = (byte) (intValue >>> 8);
-        this.buffer[this.offset++] = (byte) (intValue >>> 16);
-        this.buffer[this.offset++] = (byte) (intValue >>> 24);  
+        this.buffer[this.offset++] = (byte) (value);
+        this.buffer[this.offset++] = (byte) (value >>> 8);
+        this.buffer[this.offset++] = (byte) (value >>> 16);
+        this.buffer[this.offset++] = (byte) (value >>> 24);
     }
-    
+
     public String readString() {
         // TODO: max length
         final int stringLen = this.readInt();
-        
+
         if (stringLen < 0) {
-            System.out.println(String.format("Negative String length encountered. (%d)", length));
+            System.out.printf("Negative String length encountered. (%d)%n", length);
             return "";
         } else if (stringLen > 900000) {
-            System.out.println(String.format("Too long String encountered, length %d, max %d.", length, 900000));
+            System.out.printf("Too long String encountered, length %d, max %d.%n", length, 900000);
             return "";
         } else {
-            String s = new String(this.buffer, offset, stringLen, StandardCharsets.UTF_8);
-            return s;
+            return new String(this.buffer, offset, stringLen, StandardCharsets.UTF_8);
         }
     }
-    
-    @Override
-    public void writeString(String stringValue) {
-        super.writeString(stringValue);
 
-        if (stringValue == null) {
+    @Override
+    public void writeString(String value) {
+        super.writeString(value);
+
+        if (value == null) {
             this.writeInt(-1);
             return;
         }
 
-        byte[] bytes = stringValue.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
         if (bytes.length > 900_000) {
             Debugger.warning(String.format("ByteStream::writeString invalid string byte length %d", bytes.length));
             writeInt(-1);
@@ -96,10 +96,10 @@ public class ByteStream extends ChecksumEncoder {
         writeInt(bytes.length);
         ensureCapacity(bytes.length);
         System.arraycopy(bytes, 0, buffer, offset, bytes.length);
-        
+
         this.offset += bytes.length;
     }
-    
+
     public int readVInt() {
         int result = 0;
         int shift = 0;
@@ -125,18 +125,19 @@ public class ByteStream extends ChecksumEncoder {
 
         return (result >> 1) ^ (-(result & 1));
     }
-    
+
     @Override
-    public void writeVInt(int vintValue) {
-        super.writeVInt(vintValue);
+    public void writeVInt(int value) {
+        super.writeVInt(value);
 
+        ensureCapacity(4);
         this.bitOffset = 0;
-        int temp = (vintValue >> 25) & 0x40;
-        int flipped = vintValue ^ (vintValue >> 31);
+        int temp = (value >> 25) & 0x40;
+        int flipped = value ^ (value >> 31);
 
-        temp |= vintValue & 0x3F;
+        temp |= value & 0x3F;
 
-        vintValue >>= 6;
+        value >>= 6;
         flipped >>= 6;
 
         if (flipped == 0) {
@@ -146,46 +147,42 @@ public class ByteStream extends ChecksumEncoder {
 
         this.writeByte((byte) (temp | 0x80));
 
-        vintValue >>= 0;
-        while (true) {
+        value >>= 0;
+        do {
             int continuationBit = (flipped >> 7) != 0 ? 0x80 : 0;
-            this.writeByte((byte) ((vintValue & 0x7F) | continuationBit));
+            this.writeByte((byte) ((value & 0x7F) | continuationBit));
 
-            vintValue >>>= 7;
+            value >>>= 7;
             flipped >>>= 7;
-
-            if (flipped == 0) {
-                break;
-            }
-        }
+        } while (flipped != 0);
     }
-    
+
     public boolean readBoolean() {
         final int newBitOffset = bitOffset;
         final int newOffset = offset + (8 - newBitOffset >> 3);
-        
+
         this.offset = newOffset;
         this.bitOffset = newBitOffset + 1 & 7;
-        
+
         return (1 << (newBitOffset & 7) & this.buffer[newOffset - 1]) != 0;
     }
-    
+
     @Override
-    public void writeBoolean(boolean booleanValue) {
-        super.writeBoolean(booleanValue);
-        
+    public void writeBoolean(boolean value) {
+        super.writeBoolean(value);
+
         if (bitOffset == 0) {
             this.ensureCapacity(1);
             this.buffer[this.offset++] = 0;
         }
-        
-        if (booleanValue) {
-            this.buffer[offset - 1] |= (1 << bitOffset);
+
+        if (value) {
+            this.buffer[offset - 1] |= (byte) (1 << bitOffset);
         }
 
         this.bitOffset = (bitOffset + 1) & 7;
     }
-    
+
     public String readStringReference() {
         final int strLength = readInt();
         int maxCapacity = 900000;
@@ -204,279 +201,208 @@ public class ByteStream extends ChecksumEncoder {
 
         return "";
     }
-    
+
     @Override
     public void writeStringReference(String stringReferenceValue) {
         super.writeStringReference(stringReferenceValue);
-        
-        if (stringReferenceValue == null) {
+
+        if (stringReferenceValue.isEmpty()) {
             writeInt(0);
             return;
         }
-        
+
         byte[] bytes = stringReferenceValue.getBytes(StandardCharsets.UTF_8);
         if (bytes.length > 900000) {
             Debugger.warning(String.format("Too long String reference encountered, max %d ", 900000));
             writeInt(0);
             return;
         }
-        
+
         writeInt(bytes.length);
         ensureCapacity(bytes.length);
         System.arraycopy(bytes, 0, buffer, offset, bytes.length);
     }
-    
+
     public long readLongLong() {
         int high = this.readInt();
         int low = this.readInt();
-        
-        return LogicLong.toLong(high, low);
+
+        return ((long) high << 32) | (low & 0xFFFFFFFFL);
     }
-    
+
     @Override
-    public void writeLongLong(long longLongValue) {
-        super.writeLongLong(longLongValue);
-        
-        this.writeInt(LogicLong.getHigherInt(longLongValue));
-        this.writeInt(LogicLong.getLowerInt(longLongValue));
+    public void writeLongLong(long value) {
+        super.writeLongLong(value);
+
+        ensureCapacity(8);
+        this.writeInt((int) (value >>> 32));
+        this.writeInt((int) value);
     }
-    
+
     public LogicLong readLong() {
         return new LogicLong(this.readInt(), this.readInt());
     }
-    
-    public void writeLong(LogicLong logicLongValue) {
-        logicLongValue.encode(this);
+
+    public void writeLong(LogicLong value) {
+        ensureCapacity(8);
+        value.encode(this);
     }
-    
+
     public byte readByte() {
         return this.buffer[this.offset++];
     }
-    
+
     @Override
-    public void writeByte(byte byteValue) {
-        super.writeByte(byteValue);
+    public void writeByte(byte value) {
+        super.writeByte(value);
         this.bitOffset = 0;
         this.ensureCapacity(1);
-        this.buffer[this.offset++] = byteValue;
+        this.buffer[this.offset++] = value;
     }
-    
+
     public byte[] readBytes() {
         final int bytesLen = this.readBytesLength();
         final byte[] bytes = Arrays.copyOfRange(buffer, offset, offset + bytesLen);
         this.offset += bytesLen;
         return bytes;
     }
-    
+
     public int readBytesLength() {
         return this.readInt();
     }
-    
+
     @Override
-    public void writeBytes(byte[] bytesValue, int length) {
-        super.writeBytes(bytesValue, length);
-        
+    public void writeBytes(byte[] bytes, int length) {
+        super.writeBytes(bytes, length);
+
+        ensureCapacity(length);
         this.writeInt(length);
-        this.writeBytesWithoutLength(bytesValue);
+        this.writeBytesWithoutLength(bytes);
         this.offset += length;
         // TODO: null value -1
     }
-    
-    public void writeBytesWithoutLength(byte[] bytesValue) {
-        buffer = ArrayUtils.concat(buffer, bytesValue);
-        this.offset += bytesValue.length;
+
+    public void writeBytesWithoutLength(byte[] bytes) {
+        if (bytes == null) return;
+        ensureCapacity(bytes.length);
+        System.arraycopy(bytes, 0, this.buffer, this.offset, bytes.length);
+        this.offset += bytes.length;
     }
-    
+
     public int readInt8() {
         this.bitOffset = 0;
         return this.buffer[this.offset++];
     }
-    
+
     @Override
-    public void writeInt8(byte int8Value) {
+    public void writeInt8(byte value) {
         this.bitOffset = 0;
         this.ensureCapacity(1);
-        this.buffer[this.offset++] = (byte) (int8Value);
+        this.buffer[this.offset++] = value;
     }
-    
+
     public int readInt16() {
         this.bitOffset = 0;
         return (this.buffer[this.offset++] << 8 |
                 this.buffer[this.offset++]);
     }
-    
+
     @Override
-    public void writeInt16(short int16Value) {
+    public void writeInt16(short value) {
         this.bitOffset = 0;
         this.ensureCapacity(2);
-        this.buffer[this.offset++] = (byte) (int16Value >>> 8);
-        this.buffer[this.offset++] = (byte) (int16Value);
+        this.buffer[this.offset++] = (byte) (value >>> 8);
+        this.buffer[this.offset++] = (byte) (value);
     }
-    
+
     public int readInt24() {
         this.bitOffset = 0;
         return (this.buffer[this.offset++] << 16 |
                 this.buffer[this.offset++] << 8 |
                 this.buffer[this.offset++]);
     }
-    
+
     @Override
-    public void writeInt24(int int24Value) {
+    public void writeInt24(int value) {
         this.bitOffset = 0;
         this.ensureCapacity(3);
-        this.buffer[this.offset++] = (byte) (int24Value >>> 16);
-        this.buffer[this.offset++] = (byte) (int24Value >>> 8);
-        this.buffer[this.offset++] = (byte) (int24Value);
+        this.buffer[this.offset++] = (byte) (value >>> 16);
+        this.buffer[this.offset++] = (byte) (value >>> 8);
+        this.buffer[this.offset++] = (byte) (value);
     }
-    
+
     public long readVLong() {
-        this.bitOffset = 0;
+        int b = this.buffer[this.offset++] & 0xFF;
 
-        byte b = buffer[offset++];
         boolean negative = (b & 0x40) != 0;
-        long result = b & 0x3F;
+        long value = b & 0x3f;
+        int shift = 6;
 
-        if ((b & 0x80) == 0) {
-            return negative ? result | 0xFFFFFFC0L : result;
+        while ((b & 0x80) != 0) {
+            b = this.readByte();
+
+            value |= ((long) (b & 0x7F)) << shift;
+            shift += 7;
         }
 
-        result |= (buffer[offset++] & 0x7FL) << 6;
-        if ((buffer[offset - 1] & 0x80) == 0) {
-            return negative ? result | 0xFFFFE000L : result;
+        if (negative && shift < 64) {
+            value |= (long) (~0) << shift;
         }
 
-        result |= (buffer[offset++] & 0x7FL) << 13;
-        if ((buffer[offset - 1] & 0x80) == 0) {
-            return negative ? result | 0xFFF00000L : result;
-        }
-
-        result |= (buffer[offset++] & 0x7FL) << 20;
-        if ((buffer[offset - 1] & 0x80) == 0) {
-            return negative ? result | 0xF8000000L : result;
-        }
-
-        result |= (buffer[offset++] & 0x7FL) << 27;
-        if ((buffer[offset - 1] & 0x80) == 0) {
-            return result;
-        }
-
-        // skip remaining bytes idk why
-        for (int i = 0; i < 4 && (buffer[offset] & 0x80) != 0; i++) {
-            offset++;
-        }
-        offset++; // termination byte
-
-        return result;
+        return value;
     }
-    
+
     @Override
     public void writeVLong(long value) {
-        this.bitOffset = 0;
-        ensureCapacity(10);
+        super.writeVLong(value);
 
-        if (value >= 0) {
-            if (value <= 0x3F) {
-                buffer[offset++] = (byte) value;
-                return;
-            }
-            if (value <= 0x1FFF) {
-                buffer[offset++] = (byte) ((value & 0x3F) | 0x80);
-                buffer[offset++] = (byte)  (value >>> 6);
-                return;
-            }
-            if (value <= 0xFFFFF) {
-                buffer[offset++] = (byte) ((value & 0x3F) | 0x80);
-                buffer[offset++] = (byte) ((value >>> 6)  | 0x80);
-                buffer[offset++] = (byte)  (value >>> 13);
-                return;
-            }
-            if (value <= 0x7FFFFFFL) {
-                buffer[offset++] = (byte) ((value & 0x3F) | 0x80);
-                buffer[offset++] = (byte) ((value >>> 6)  | 0x80);
-                buffer[offset++] = (byte) ((value >>> 13) | 0x80);
-                buffer[offset++] = (byte)  (value >>> 20);
-                return;
-            }
+        ensureCapacity(8);
+        final boolean negative = value < 0;
+        long first = value & 0x3f | (negative ? 0x40 : 0);
+        value >>= 6;
+        final boolean done = (negative && value == -1) || (!negative && value == 0);
+        if (done) {
+            this.buffer[this.offset++] = (byte) first;
+            return;
+        }
 
-            int high32 = (int) (value >>> 32);
-            int numCont = 3;
-            if (high32 >= 0x40000000) numCont = 7;
-            else if (high32 >= 0x800000) numCont = 6;
-            else if (high32 >= 0x10000) numCont = 5;
-            else if (high32 >= 512) numCont = 4;
+        this.buffer[this.offset++] = (byte) (first | 0x80);
+        while (true) {
+            byte b = (byte) (value & 0x7f);
+            value >>= 7;
 
-            buffer[offset++] = (byte) ((value & 0x3F) | 0x80);
-            int shift = 6;
-            for (int i = 0; i < numCont; i++) {
-                buffer[offset++] = (byte) ((value >>> shift) | 0x80);
-                shift += 7;
-            }
-            buffer[offset++] = (byte) (value >>> shift);
+            final boolean finished = (value == 0 && (b & 0x40) == 0) || (value == -1 && (b & 0x40) != 0);
+            if (!finished)
+                b |= (byte) 0x80;
+            this.buffer[this.offset++] = b;
 
-        } else {
-            if (value >= -63) {
-                buffer[offset++] = (byte) ((value & 0x3F) | 0x40);
-                return;
-            }
-            if (value > -8192) {
-                buffer[offset++] = (byte) (value | 0xC0);
-                buffer[offset++] = (byte) (value >>> 6);
-                return;
-            }
-            if (value > -1048576) {
-                buffer[offset++] = (byte)  (value | 0xC0);
-                buffer[offset++] = (byte) ((value >>> 6) | 0x80);
-                buffer[offset++] = (byte)  (value >>> 13);
-                return;
-            }
-            if (value > -134217728) {
-                buffer[offset++] = (byte) (value | 0xC0);
-                buffer[offset++] = (byte) ((value >>> 6) | 0x80);
-                buffer[offset++] = (byte) ((value >>> 13) | 0x80);
-                buffer[offset++] = (byte) (value >>> 20);
-                return;
-            }
-
-            int high32 = (int) (value >>> 32);
-            int adjusted = high32 + (value != 0 ? 1 : 0);
-            int numCont = 3;
-            if (adjusted < -1073741824) numCont = 7;
-            else if (adjusted < -8388608) numCont = 6;
-            else if (adjusted < -65536) numCont = 5;
-            else if (adjusted < -512) numCont = 4;
-
-            buffer[offset++] = (byte) (value | 0xC0);
-            int shift = 6;
-            for (int i = 0; i < numCont; i++) {
-                buffer[offset++] = (byte) ((value >>> shift) | 0x80);
-                shift += 7;
-            }
-            buffer[offset++] = (byte) (value >>> shift);
+            if (finished)
+                break;
         }
     }
-    
+
     public String readFilteredString() {
         System.out.println("TODO: readFilteredString");
         return "";
     }
-    
-    public void writeFilteredString(String filteredStringValue) {
+
+    public void writeFilteredString(String value) {
         System.out.println("TODO: writeFilteredString");
     }
-    
+
     public String readFilteredStringReference() {
         System.out.println("TODO: readFilteredStringReference");
         return "";
     }
-    
+
     @Override
-    public void writeFilteredStringReference(String filteredStringReferenceValue) {
+    public void writeFilteredStringReference(String value) {
         System.out.println("TODO: writeFilteredStringReference");
     }
-    
+
     private void ensureCapacity(int capacity) {
         final int len = this.buffer.length;
-        
+
         if (offset + capacity > len) {
             this.buffer = ArrayUtils.concat(buffer, new byte[capacity]);
         }

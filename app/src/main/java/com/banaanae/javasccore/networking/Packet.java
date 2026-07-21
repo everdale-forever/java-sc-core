@@ -17,15 +17,21 @@ public class Packet {
             this.bytes = new byte[0];
             return;
         }
-        
+
         this.id = ArrayUtils.readUInt16BE(data, 0);
         this.len = (int) ArrayUtils.readUIntBE(data, 2, 3);
         this.version = ArrayUtils.readUInt16BE(data, 5);
-        
-        if (len < 0 || len > data.length - 7) {
-            this.bytes = new byte[0];
-            return;
+
+        int endIndex = 7 + this.len;
+
+        if (endIndex > data.length) {
+            endIndex = data.length;
         }
-        this.bytes = Arrays.copyOfRange(data, 7, 7 + len);
+
+        if (endIndex > 7) {
+            this.bytes = Arrays.copyOfRange(data, 7, endIndex);
+        } else {
+            this.bytes = new byte[0];
+        }
     }
 }

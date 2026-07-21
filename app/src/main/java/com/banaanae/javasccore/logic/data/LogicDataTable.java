@@ -1,9 +1,11 @@
 package com.banaanae.javasccore.logic.data;
 
+import com.banaanae.javasccore.logic.data.TablesData.*;
 import com.banaanae.javasccore.titan.Debugger;
 import com.banaanae.javasccore.titan.GlobalID;
 import com.banaanae.javasccore.titan.csv.CSVRow;
 import com.banaanae.javasccore.titan.csv.CSVTable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class LogicDataTable {
     }
 
     public final void loadTable() {
-        for (int i = 0; i < this.table.getRowCount(); i++) {
+        for (int i = 0; i < this.table.getRowCountOfCSVRow(); i++) {
             this.addItem(this.table.getRowAt(i));
         }
     }
@@ -38,7 +40,7 @@ public class LogicDataTable {
         }
     }
 
-    public void addItem(CSVRow row) { 
+    public void addItem(CSVRow row) {
         this.items.add(this.createItem(row));
     }
 
@@ -91,14 +93,12 @@ public class LogicDataTable {
     }
 
     public LogicData getDataByName(String name) {
-        if (name != null && name.length() > 0) {
-            for (int i = 0; i < this.items.size(); i++) {
-                final LogicData data = this.items.get(i);
-
+        if (name != null && !name.isEmpty()) {
+            for (final LogicData data : this.items) {
                 if (data.getName().equals(name))
                     return data;
             }
- 
+
             Debugger.warning("CSV row has an invalid name:", name);
         }
 
@@ -115,6 +115,10 @@ public class LogicDataTable {
         }
 
         return this.items.get(instanceId);
+    }
+
+    public CSVTable getCSVTable() {
+        return this.table;
     }
 
     public int getItemCount() {
